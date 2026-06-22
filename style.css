@@ -1,0 +1,55 @@
+/* ----------------- GLOBAL STYLES -----------------*/
+* { 
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #fcfcfc /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
+}
+
+/* ---------------- NAVBAR LAYOUUT --------------- */
+.top-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+}
+
+/* ---------------------- NAB BUTTON STYLING ------------------- */
+.nav-button {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #ffffff; /* FEEL FREE TO CHANGE, PLACEHOLDER */
+    border: 2px solid #000000; /* See above comment */
+    border-radius: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.5s ease, background 0.1s ease;
+}
+.nav-button:active {
+    transform: scale(0.98);
+}
+.nav-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+.nav-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #000000; /* Another placeholder */
+}
+.heat-button {
+    overflow: hidden;
+    background: linear-gradient(to top, #ff3b30 0%, #ff9500 0%, #ffffff 0%);
+}

@@ -22,10 +22,10 @@ function updateHeatUI(heatValue) {
     const clampedHeat = Math.max(0, Math.min(100, heatValue));
 
     if(uiElements.btnHeat) {
-        uiElements.btnHeat.style.background = `linear-gradient(to top, 
+        uiElements.btnHeat.style.background = `linear-gradient(to right, 
             #ff3b30 0%,
             #ff9500 ${clampedHeat}%,
-            #ffffff ${clampedHeat}%
+            #696161bd ${clampedHeat}%
         )`;
     }
 }

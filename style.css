@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #fcfcfc /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
+    background-color: #0d072a /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
 }
 
 /* ---------------- NAVBAR LAYOUUT --------------- */
@@ -28,7 +28,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background-color: #ffffff; /* FEEL FREE TO CHANGE, PLACEHOLDER */
+    background-color: #696161bd; /* FEEL FREE TO CHANGE, PLACEHOLDER */
     border: 2px solid #000000; /* See above comment */
     border-radius: 14px;
     padding: 14px 20px;
@@ -51,5 +51,5 @@ body {
 }
 .heat-button {
     overflow: hidden;
-    background: linear-gradient(to top, #ff3b30 0%, #ff9500 0%, #ffffff 0%);
+    background: linear-gradient(to right, #ff3b30 0%, #ff9500 0%, #696161bd 0%);
 }

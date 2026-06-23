@@ -66,7 +66,7 @@ function initWheelDrag() {
 
 
     const grabArea = 0.59; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
-    const grabFalloff = 0.6 //Distance from center where power fades to 0 ADAPT AS NECESSARY
+    const grabFalloff = 0.88 //Distance from center where power fades to 0 ADAPT AS NECESSARY
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {

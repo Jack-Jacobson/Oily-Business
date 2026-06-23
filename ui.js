@@ -61,15 +61,19 @@ function initWheelDrag() {
     //Wheel spinning physics vars
     let lastAngle = 0;
     let velocity = 0;
-    let friction = 0.98; //ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
+    let friction = 0.96; //ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
     let animationFrameId = null; //Physics animation loop reference
+
+
+    let grabArea = 0.50; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {
         const rect = element.getBoundingClientRect();
         return {
             x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
+            y: rect.top + rect.height / 2,
+            radius: Math.min(element.offsetWidth, element.offsetHeight) / 2
         };
     }
 
@@ -82,7 +86,8 @@ function initWheelDrag() {
         //Once spinning very slowly just stop, adjust as necessary
         if(Math.abs(velocity) < 0.01){
             velocity = 0;
-            cancelAnimationFrame(animatedFrameId);
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
             return;
         }
 
@@ -94,12 +99,26 @@ function initWheelDrag() {
 
     //Mathing angles and prepares to spin wheel when click on the wheel
     wheel.addEventListener('pointerdown', (e) => {
-        isDragging = true;
 
-        if(animationFrameId) cancelAnimationFrame(animationFrameId);
+        if(animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+
         velocity = 0;
 
         const center = getCenter(wheel);
+
+        //Calculates hypotenuse between click and center
+        const dist = Math.hypot(e.clientX - center.x, e.clientY - center.y);
+
+        //Return if hypotenuse is less that allowed by grab area percent
+        if (dist < center.radius * (1 - grabArea) || dist > center.radius) {
+            return; 
+        } 
+
+        isDragging = true;
+        wheel.style.cursor = 'grabbing';
 
         startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
         lastAngle = startAngle;
@@ -110,7 +129,18 @@ function initWheelDrag() {
 
     //when user rotates, spin wheel after calculating angle change
     wheel.addEventListener('pointermove', (e) => {
-        if(!isDragging) return;
+        if(!isDragging) {
+            const center = getCenter(wheel);
+            const dist = Math.hypot(e.clientX - center.x, e.clientY - center.y);
+
+            //Logic for not allowed or grab cursor when hovering over grabable area
+            if (dist >= center.radius * (1 - grabArea) && dist <= center.radius) {
+                wheel.style.cursor = 'grab';
+            } else {
+                wheel.style.cursor = 'not-allowed';
+            }
+            return;
+        }
 
         const center = getCenter(wheel);
         const currentAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
@@ -132,6 +162,9 @@ function initWheelDrag() {
 
     const stopDrag = (e) => {
         isDragging = false;
+       
+        wheel.style.cursor = 'grab';
+
         if (e.pointerId) wheel.releasePointerCapture(e.pointerId);
 
         animationFrameId = requestAnimationFrame(updateInertia);

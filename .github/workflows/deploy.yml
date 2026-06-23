@@ -21,6 +21,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          git config --global --add safe.directory /var/www/oilybusiness
+
           cd /var/www/oilybusiness/
           
           git fetch origin main

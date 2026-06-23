@@ -52,11 +52,17 @@ function initWheelDrag() {
     const wheel = uiElements.wheel;
     if(!wheel) return;
 
+    //Wheel spinning vars
     let isDragging = false;
     let currentRotation = 0;
     let startAngle = 0;
     let startRotation = 0;
-    let chachedCenter = null;
+
+    //Wheel spinning physics vars
+    let lastAngle = 0;
+    let velocity = 0;
+    let friction = 0.98; //ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
+    let animationFrameId = null; //Physics animation loop reference
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {
@@ -65,14 +71,38 @@ function initWheelDrag() {
             x: rect.left + rect.width / 2,
             y: rect.top + rect.height / 2
         };
-    } 
+    }
+
+    //Pyhsics engine to animate wheel after release
+    function updateInertia() {
+        if(isDragging) return;
+
+        velocity *= friction;
+
+        //Once spinning very slowly just stop, adjust as necessary
+        if(Math.abs(velocity) < 0.01){
+            velocity = 0;
+            cancelAnimationFrame(animatedFrameId);
+            return;
+        }
+
+        currentRotation += velocity;
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        animationFrameId = requestAnimationFrame(updateInertia);
+    }
 
     //Mathing angles and prepares to spin wheel when click on the wheel
     wheel.addEventListener('pointerdown', (e) => {
         isDragging = true;
+
+        if(animationFrameId) cancelAnimationFrame(animationFrameId);
+        velocity = 0;
+
         const center = getCenter(wheel);
 
         startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
+        lastAngle = startAngle;
         startRotation = currentRotation;
 
         wheel.setPointerCapture(e.pointerId);
@@ -86,15 +116,25 @@ function initWheelDrag() {
         const currentAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
 
         const angleDiff = currentAngle - startAngle;
-
         currentRotation = startRotation + angleDiff;
 
         wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        let frameDiff = currentAngle - lastAngle;
+
+
+        if (frameDiff > 180) frameDiff -= 360;
+        if (frameDiff < -180) frameDiff += 360;
+
+        velocity = frameDiff;
+        lastAngle = currentAngle;
     });
 
     const stopDrag = (e) => {
         isDragging = false;
         if (e.pointerId) wheel.releasePointerCapture(e.pointerId);
+
+        animationFrameId = requestAnimationFrame(updateInertia);
     };
 
     wheel.addEventListener('pointerup', stopDrag);

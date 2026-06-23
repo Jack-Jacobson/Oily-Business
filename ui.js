@@ -44,7 +44,83 @@ function initNavbarListeners() {
     uiElements.btnSettings?.addEventListener('click', () => console.log('Settings clicked'));
 }
 
-/** 
+/**
+ * Save data functions and variables
+ * Add all variables here ( you may need to change this to be in a function depending on how you setup Global vars ) for save files.
+ */
+
+const saveData = {
+    money: 100, /* example variable */
+}
+
+async function signData(data, secretKey) {
+    const json = JSON.stringify(data);
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(secretKey),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+    );
+    const signature = await crypto.subtle.sign(
+        "HMAC", keyMaterial, new TextEncoder().encode(json)
+    );
+    return {
+        payload: json,
+        sig: btoa(String.fromCharCode(...new Uint8Array(signature)))
+    };
+}
+
+function encodeSave(signedBundle) {
+    const json = JSON.stringify(signedBundle);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    const xorKey = 0x5A; /* if one of you cares you can change this to something else */
+    const xored = Array.from(b64) /* again just doing base64 because it doesn't really matter that much it's just extra */
+        .map((c, i) => String.fromCharCode(c.charCodeAt(0) ^ (xorKey + i % 16 )))
+        .join("");
+    return btoa(xored);
+}
+/* export / load */
+
+async function exportSave(saveData, secretKey) {
+    const signed = await signData(saveData, secretKey);
+    const encoded = encodeSave(signed);
+    const blob = new Blob([encoded], { type: "application/octet-stream" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "savedata.dat";
+    a.click();
+}
+
+async function loadSave(file, secretKey) {
+    const raw = await file.text();
+    const xorKey = 0x5A;
+    const step1 = atob(raw);
+    const unxored = Array.from(step1)
+        .map((c, i) => String.fromCharCode(c.charCodeAt(0) ^ (xorKey + i % 16)))
+        .join("");
+
+    const bundleJson = decodeURIComponent(escape(atob(unxored)));
+    const bundle = JSON.parse(bundleJson);
+
+    const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(secretKey),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["verify"]
+    );
+    const sigBytes = Uint8Array.from(atob(bundle.sig), c => c.charCodeAt(0));
+    const valid = await crypto.subtle.verify(
+        "HMAC", keyMaterial, sigBytes,
+        new TextEncoder().encode(bundle.payload)
+    );
+
+    if (!valid) throw new Error("File is corrupted.");
+    return JSON.parse(bundle.payload);
+}
+
+/**
  * WHEEL DRAG LOGIC
  * Uses trig to calculate angle of pointer relative to wheel center
  */

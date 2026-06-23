@@ -65,7 +65,8 @@ function initWheelDrag() {
     let animationFrameId = null; //Physics animation loop reference
 
 
-    let grabArea = 0.59; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
+    const grabArea = 0.59; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
+    const grabFalloff = 0.35 //Distance from center where power fades to 0 ADAPT AS NECESSARY
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {
@@ -75,6 +76,12 @@ function initWheelDrag() {
             y: rect.top + rect.height / 2,
             radius: Math.min(element.offsetWidth, element.offsetHeight) / 2
         };
+    }
+
+    //Helper to find strength depending on how close to center you are (leverage)
+    function getGrabStrength(dist, radius) {
+        const fadeDistance = radius * grabFalloff;
+        return Math.max(0, 1 - Math.min(1, Math.abs(dist - radius) / fadeDistance));
     }
 
     //Pyhsics engine to animate wheel after release
@@ -144,20 +151,21 @@ function initWheelDrag() {
 
         const center = getCenter(wheel);
         const currentAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
-
-        const angleDiff = currentAngle - startAngle;
-        currentRotation = startRotation + angleDiff;
-
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
+        const dist = Math.hypot(e.clientX - center.x, e.clientY - center.y);
 
         let frameDiff = currentAngle - lastAngle;
 
+        if(frameDiff > 180) frameDiff -=360;
+        if(frameDiff < -180) frameDiff +=360;
 
-        if (frameDiff > 180) frameDiff -= 360;
-        if (frameDiff < -180) frameDiff += 360;
+        const grabStrength = getGrabStrength(dist, center.radius);
 
-        velocity = frameDiff;
+        curentRotation += frameDiff * grabStrength;
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        velocity = frameDiff * grabStrength;
         lastAngle = currentAngle;
+        
     });
 
     const stopDrag = (e) => {

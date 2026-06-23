@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #0d072a /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
+    background-color: #0d072a; /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
 }
 
 /* ---------------- NAVBAR LAYOUUT --------------- */
@@ -21,7 +21,7 @@ body {
     margin: 40px auto 0 auto;
 }
 
-/* ---------------------- NAB BUTTON STYLING ------------------- */
+/* ---------------------- NAV BUTTON STYLING ------------------- */
 .nav-button {
     flex: 1 1 0;
     display: flex;
@@ -52,4 +52,32 @@ body {
 .heat-button {
     overflow: hidden;
     background: linear-gradient(to right, #ff3b30 0%, #ff9500 0%, #696161bd 0%);
+}
+
+/* -------------------- GAME AREA + WHEEL ---------------- */
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+}
+.wheel-container {
+    width: 350px;
+    height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+#spin-wheel {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    will-change: transform;
+}
+#spin-wheel:active {
+    cursor: grabbing;
 }

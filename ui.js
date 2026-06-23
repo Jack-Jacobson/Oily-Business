@@ -11,6 +11,7 @@ const uiElements = {
     btnHeat: document.getElementById('btn-heat'),
     btnAchievement: document.getElementById('btn-achievement'),
     btnSettings: document.getElementById('btn-settings'),
+    oilCount: document.getElementById('oil-count'),
     wheel: document.getElementById('spin-wheel')
 };
 
@@ -32,13 +33,50 @@ function updateHeatUI(heatValue) {
 }
 
 /**
+ * Helper functions to control amount of oil stored and make it pop up on screen
+ * @param {number} amount - Amount of oil to display on popup/add to total count.
+*/
+
+let oilStored = 0;
+const oilMultiplier = 1;
+
+function updateOilUI(){
+    if(uiElements.oilCount) {
+        uiElements.oilCount.textContent=oilStored;
+    }
+}
+
+function spawnOilPopup(amount) {
+    const container = uiElements.wheel?.parentElement;
+    if(!container) return;
+
+    const popup = document.createElement('div');
+    popup.className = 'oil-popup';
+    popup.textContent = `+${amount} oil`;
+
+    //random offset
+    popup.style.left = `${50 + (Math.random() * 8 - 4)}%`;
+
+    container.appendChild(popup);
+
+    popup.addEventListener('animationend', () => {
+        popup.remove();
+    }, {once: true});
+}
+
+function addOil(amount) {
+    oilStored += amount;
+    updateOilUI();
+    spawnOilPopup(amount);
+}
+
+/**
  * Attachese navigation listeners
  * CURRENTLY PLACEHOLDERS!
  */
 
 function initNavbarListeners() {
     uiElements.btnMoney?.addEventListener('click', () => console.log('Money clicked'));
-    uiElements.btnOil?.addEventListener('click', () => console.log('Oil clicked'));
     uiElements.btnHeat?.addEventListener('click', () => console.log('Heat clicked'));
     uiElements.btnAchievement?.addEventListener('click', () => console.log('Achievement clicked'));
     uiElements.btnSettings?.addEventListener('click', () => console.log('Settings clicked'));
@@ -125,6 +163,7 @@ function initWheelDrag() {
         } 
 
         isDragging = true;
+        didSpinThisDrag = false;
         wheel.style.cursor = 'grabbing';
 
         startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
@@ -159,21 +198,30 @@ function initWheelDrag() {
         if(frameDiff < -180) frameDiff +=360;
 
         const grabStrength = getGrabStrength(dist, center.radius);
+        const appliedDiff = frameDiff * grabStrength;
 
-        currentRotation += frameDiff * grabStrength;
+        currentRotation += appliedDiff;
         wheel.style.transform = `rotate(${currentRotation}deg)`;
 
         velocity = frameDiff * grabStrength;
+        if(Math.abs(appliedDiff) > 0.05) {
+            didSpinThisDrag = true;
+        }
         lastAngle = currentAngle;
         
     });
 
     const stopDrag = (e) => {
+        const wasDragging = isDragging;
         isDragging = false;
        
         wheel.style.cursor = 'grab';
 
         if (e.pointerId) wheel.releasePointerCapture(e.pointerId);
+
+        if(e.type === 'pointerup' && wasDragging && didSpinThisDrag){
+            addOil(1 * oilMultiplier);
+        }
 
         animationFrameId = requestAnimationFrame(updateInertia);
     };
@@ -188,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbarListeners();//Initializes buttons
     initWheelDrag(); //Initializes wheel spin
 
+    updateOilUI();
 
     //TEST OF HEAT BAR, DELETE LATER
     let mockHeat = 50;

@@ -19,7 +19,6 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
         script: |
           git config --global --add safe.directory /var/www/oilybusiness
           
@@ -27,14 +26,11 @@ jobs:
           
           if [ ! -d ".git" ]; then
             git init
-            git remote add origin https://github.com/Jack-Jacobson/Oily-Business.git
-          else
-            git remote set-url origin https://github.com/Jack-Jacobson/Oily-Business.git
           fi
+          
+          git remote remove origin 2>/dev/null || true
+          git remote add origin https://github.com/Jack-Jacobson/Oily-Business.git
           
           git fetch origin main
           
           git reset --hard origin/main
-          
-          sudo systemctl restart nginx
-          sudo systemctl restart cloudflared

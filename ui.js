@@ -70,6 +70,17 @@ function addOil(amount) {
     spawnOilPopup(amount);
 }
 
+function checkRotationRewards() {
+    const rotationsEarned =  Math.floor(Math.abs(currentRotation) / 360);
+    const rotationsAlreadyPaid = Math.floor(Math.abs(rewardedRotation) / 350);
+    const newRotations = rotationsEarned - rotationsAlreadyPaid;
+
+    if(newRotations > 0){
+        addOil(newRotations * oilMultiplier);
+        rewardedRotation += newRotations * 360 * Math.sign(currentAngle || 1)
+    }
+}
+
 /**
  * Attachese navigation listeners
  * CURRENTLY PLACEHOLDERS!
@@ -92,7 +103,9 @@ function initWheelDrag() {
 
     //Wheel spinning vars
     let isDragging = false;
+
     let currentRotation = 0;
+    let rewardedRotation = 0;
     let startAngle = 0;
     let startRotation = 0;
 
@@ -137,6 +150,7 @@ function initWheelDrag() {
         }
 
         currentRotation += velocity;
+        checkRotationRewards();
         wheel.style.transform = `rotate(${currentRotation}deg)`;
 
         animationFrameId = requestAnimationFrame(updateInertia);
@@ -162,8 +176,6 @@ function initWheelDrag() {
             return; 
         } 
 
-        isDragging = true;
-        didSpinThisDrag = false;
         wheel.style.cursor = 'grabbing';
 
         startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
@@ -201,27 +213,20 @@ function initWheelDrag() {
         const appliedDiff = frameDiff * grabStrength;
 
         currentRotation += appliedDiff;
+        checkRotationRewards();
         wheel.style.transform = `rotate(${currentRotation}deg)`;
 
         velocity = frameDiff * grabStrength;
-        if(Math.abs(appliedDiff) > 0.05) {
-            didSpinThisDrag = true;
-        }
+
         lastAngle = currentAngle;
         
     });
 
     const stopDrag = (e) => {
-        const wasDragging = isDragging;
-        isDragging = false;
-       
+
         wheel.style.cursor = 'grab';
 
         if (e.pointerId) wheel.releasePointerCapture(e.pointerId);
-
-        if(e.type === 'pointerup' && wasDragging && didSpinThisDrag){
-            addOil(1 * oilMultiplier);
-        }
 
         animationFrameId = requestAnimationFrame(updateInertia);
     };

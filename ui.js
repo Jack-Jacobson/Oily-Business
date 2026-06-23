@@ -61,12 +61,12 @@ function initWheelDrag() {
     //Wheel spinning physics vars
     let lastAngle = 0;
     let velocity = 0;
-    let friction = 0.96; //ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
+    let friction = 0.98; //ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
     let animationFrameId = null; //Physics animation loop reference
 
 
     const grabArea = 0.59; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
-    const grabFalloff = 0.35 //Distance from center where power fades to 0 ADAPT AS NECESSARY
+    const grabFalloff = 0.6 //Distance from center where power fades to 0 ADAPT AS NECESSARY
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {
@@ -160,7 +160,7 @@ function initWheelDrag() {
 
         const grabStrength = getGrabStrength(dist, center.radius);
 
-        curentRotation += frameDiff * grabStrength;
+        currentRotation += frameDiff * grabStrength;
         wheel.style.transform = `rotate(${currentRotation}deg)`;
 
         velocity = frameDiff * grabStrength;

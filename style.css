@@ -61,6 +61,15 @@ body {
     overflow: hidden;
     background: linear-gradient(to right, #ff3b30 0%, #ff9500 0%, #696161bd 0%);
 }
+#btn-oil {
+    pointer-events: none;
+    cursor: default;
+}
+.oil-count {
+    display: inline-block;
+    min-width: 1ch;
+    margin-left: 6px;
+}
 
 /* -------------------- GAME AREA + WHEEL ---------------- */
 .game-container {
@@ -84,4 +93,33 @@ body {
     user-select: none;
     touch-action: none;
     will-change: transform;
+}
+
+/* ------------------- OIL POPUPS ------------------ */
+.oil-popup {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 10;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d9ffbf;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65),  0 0 12px rgba(217, 255, 191, 0.35);
+    animation: oil-float 900ms ease-out forwards;
+    will-change: transform, opacity;
+}
+@keyframes oil-float {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 8px) scale(0.85);
+    }
+    15% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + 18px), -72px) scale(1.08)
+    }
 }

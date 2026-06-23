@@ -22,12 +22,19 @@ jobs:
         port: 22
         script: |
           git config --global --add safe.directory /var/www/oilybusiness
-
+          
           cd /var/www/oilybusiness/
+          
+          if [ ! -d ".git" ]; then
+            git init
+            git remote add origin https://github.com/Jack-Jacobson/Oily-Business.git
+          else
+            git remote set-url origin https://github.com/Jack-Jacobson/Oily-Business.git
+          fi
           
           git fetch origin main
           
-          git reset --hard origin/main
+          git reset --hard origin/ma
           
           sudo systemctl restart nginx
           sudo systemctl restart cloudflared

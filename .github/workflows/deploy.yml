@@ -34,3 +34,8 @@ jobs:
           git fetch origin main
           
           git reset --hard origin/main
+
+          sudo systemctl restart nginx
+          sudo systemctl restart cloudflared
+
+          exit 0 

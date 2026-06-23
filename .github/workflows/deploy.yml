@@ -32,10 +32,12 @@ jobs:
           git remote add origin https://github.com/Jack-Jacobson/Oily-Business.git
           
           git fetch origin main
-          
           git reset --hard origin/main
 
-          sudo systemctl restart nginx
-          sudo systemctl restart cloudflared
+          sudo systemctl restart nginx || true
+          echo "nginx exit code: $?"
 
-          exit 0 
+          sudo systemctl restart cloudflared || true
+          echo "cloudflare exit code: $?"
+
+          true

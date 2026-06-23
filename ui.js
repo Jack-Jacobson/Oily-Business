@@ -65,7 +65,7 @@ function initWheelDrag() {
     let animationFrameId = null; //Physics animation loop reference
 
 
-    let grabArea = 0.50; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
+    let grabArea = 0.59; //Outer percent of wheel that you can grab ADAPT AS NECESSARY
 
     //Helper to find wheel center x and y on screen
     function getCenter(element) {

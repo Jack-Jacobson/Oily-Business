@@ -15,8 +15,9 @@ let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
 let isSpinning = false;
-const heatPerDegree = 10/ 360 //0% heat per turn
-const heatCooldownPerSec = 10; //10% heat per second
+const heatPerDegree = 10/ 360 //10% heat gained per turn
+const heatCooldownPerSec = 10; 
+let overheatPopupShown = false;
 
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
@@ -66,7 +67,7 @@ function updateOilUI() {
     }
 }
 
-function updaetMoneyUI(){
+function updateMoneyUi(){
     if (uiElements.moneyCount){
         uiElements.moneyCount.textContent = money.toFixed(2);
     }
@@ -77,7 +78,7 @@ function spawnOilPopup(amount) {
     if (!container) return;
 
     const popup = document.createElement('div');
-    popup.className = 'oil-popup';
+    popup.className = 'oil-popup overheat';
     popup.textContent = `+${amount} oil`;
 
     // Random offset
@@ -88,6 +89,23 @@ function spawnOilPopup(amount) {
     popup.addEventListener('animationend', () => {
         popup.remove();
     }, { once: true });
+}
+
+function spawnOverheatPopup(amount) {
+    const container = uiElements.wheel?.parentElement;
+    if(!container) return;
+
+    const popup = document.createElement('div');
+    popup.className = 'oil-popup';
+    popup.innerHTML = `Drill overheated!<br>Stop and let it cool down.`;
+
+    popup.style.left = `${50 + (Math.random() * 8 - 4)}%`;
+
+    container.appendChild(popup);
+
+    popup.addEventListener('animationend', () => {
+        popup.remove();
+    }, {once:true});
 }
 
 function addOil(amount) {
@@ -106,7 +124,7 @@ function sellAllOil() {
     oilStored = 0;
 
     updateOilUI();
-    updaetMoneyUI();
+    updateMoneyUi();
 }
 
 function updateDemand() {
@@ -139,9 +157,21 @@ function updateOilPanelUI() {
 }
 
 function addHeat(amount) {
+    const prevHeat = heat;
+
     heat += amount;
     heat = Math.max(0, Math.min(100, heat));
+
     updateHeatUI(heat);
+
+    if(heat >= 100 && prevHeat < 100 && !overheatPopupShown) {
+        overheatPopupShown = true;
+        spawnOverheatPopup();
+    }
+
+    if(heat < 100){
+        overheatPopupShown = false;
+    }
 }
 
 function isOverheated() {
@@ -438,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbarListeners(); 
     initWheelDrag(); 
     initUpgradesPanel();
-    updaetMoneyUI();
+    updateMoneyUi();
     initOilPanel();
     updateOilUI();
     updateOilPanelUI();

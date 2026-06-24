@@ -93,6 +93,7 @@ body {
     user-select: none;
     touch-action: none;
     will-change: transform;
+    -webkit-user-drag: none;
 }
 
 /* ------------------- OIL POPUPS ------------------ */

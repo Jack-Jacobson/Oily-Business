@@ -194,11 +194,20 @@ body {
     border-top: none;
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.25s ease;
-    z-index: 100;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    border-radius: 14px;
+    transition:
+        max-height 0.25s ease,
+        opacity 0.15s ease,
+        transform 0.25s ease;
 }
 .oil-sell-panel.open {
-    max-height: 120px;
+    max-height: 140px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 .oil-price-row {
     color: #f4f4f4;

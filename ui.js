@@ -163,6 +163,9 @@ function initWheelDrag() {
     const wheel = uiElements.wheel;
     if (!wheel) return;
 
+    wheel.draggable = false;
+    wheel.addEventListener('dragstart', (e) => e.preventDefault());
+
     // Wheel spinning vars
     let isDragging = false;
     let currentRotation = 0;

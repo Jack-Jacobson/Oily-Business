@@ -119,11 +119,11 @@ body {
 }
 #oil-rig-extended {
     opacity: 0;
-    transform: translateX(-50%) translateY(6px);
+    transform: translateX(-50%);
 }
 #oil-rig-extended.visible {
     opacity: 1;
-    transform: translateX(-50%) translateY(6px);
+    transform: translateX(-50%);
 }
 #oil-rig-base.hidden {
     opacity: 0;

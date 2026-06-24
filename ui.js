@@ -148,7 +148,6 @@ let saveData = {
     oilMultiplier: oilMultiplier,
     money: money,
     oilPrice: oilPrice,
-    oilStored: oilStored,
     heat: heat
 }
 
@@ -380,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initWheelDrag(); // Initializes wheel spin
     initUpgradesPanel();
     updaetMoneyUI();
+    initOilPanel();
 
     updateOilUI();
 

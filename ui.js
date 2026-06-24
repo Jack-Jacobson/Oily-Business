@@ -12,7 +12,9 @@ const uiElements = {
     btnAchievement: document.getElementById('btn-achievement'),
     btnSettings: document.getElementById('btn-settings'),
     oilCount: document.getElementById('oil-count'),
-    wheel: document.getElementById('spin-wheel')
+    wheel: document.getElementById('spin-wheel'),
+    upgradesPanel: document.getElementById('upgrades-panel'),
+    upgradesToggle: document.getElementById('upgrades-toggle')
 };
 
 /** 
@@ -24,9 +26,9 @@ function updateHeatUI(heatValue) {
 
     if (uiElements.btnHeat) {
         uiElements.btnHeat.style.background = `linear-gradient(to right, 
-            #ff3b30 0%,
-            #ff9500 ${clampedHeat}%,
-            #696161bd ${clampedHeat}%
+            #8b3f00 0%,
+            #d97706 ${clampedHeat}%,
+            #212428 ${clampedHeat}%
         )`;
     }
 }
@@ -36,7 +38,7 @@ function updateHeatUI(heatValue) {
  * @param {number} amount - Amount of oil to display on popup/add to total count.
  */
 let oilStored = 0;
-const oilMultiplier = 1;
+let oilMultiplier = 1;
 
 function updateOilUI() {
     if (uiElements.oilCount) {
@@ -79,13 +81,26 @@ function initNavbarListeners() {
     uiElements.btnSettings?.addEventListener('click', () => console.log('Settings clicked'));
 }
 
+function initUpgradesPanel() {
+    uiElements.upgradesToggle?.addEventListener('click', () => {
+        uiElements.upgradesPanel?.classList.toggle('open');
+
+        uiElements.upgradesToggle.textContent =
+            uiElements.upgradesPanel.classList.contains('open')
+                ? '<'
+                : '>';
+    });
+}
+
 /**
  * Save data functions and variables
  * Add all variables here ( you may need to change this to be in a function depending on how you setup Global vars ) for save files.
  */
 
 const saveData = {
-    money: 100, /* example variable */
+    oilStored: oilStored,
+    oilMultiplier: oilMultiplier,
+    heat: 50
 }
 
 async function signData(data, secretKey) {
@@ -314,14 +329,8 @@ function initWheelDrag() {
 document.addEventListener('DOMContentLoaded', () => {
     initNavbarListeners(); // Initializes buttons
     initWheelDrag(); // Initializes wheel spin
+    initUpgradesPanel();
 
     updateOilUI();
 
-    // TEST OF HEAT BAR, DELETE LATER
-    let mockHeat = 50;
-    setInterval(() => {
-        mockHeat += 1;
-        if (mockHeat > 100) mockHeat = 0;
-        updateHeatUI(mockHeat);
-    }, 60);
 });

@@ -7,7 +7,7 @@
 
 body {
     font-family: 'ArcadeGamer', 'Segoe UI', sans-serif;
-    background-color: #0d072a /* FEEL FREE TO CHANGE IS PLACEHOLDER*/
+    background-color: #1b1c1f
 }
 
 @font-face {
@@ -35,8 +35,8 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background-color: #696161bd; /* FEEL FREE TO CHANGE, PLACEHOLDER */
-    border: 2px solid #000000; /* See above comment */
+    background-color: #212428; /* FEEL FREE TO CHANGE, PLACEHOLDER */
+    border: 1px solid #183f70; /* See above comment */
     border-radius: 14px;
     padding: 14px 20px;
     cursor: pointer;
@@ -54,12 +54,12 @@ body {
 .nav-text {
     font-size: 1.2rem;
     font-weight: 700;
-    color: #000000; /* Another placeholder */
+    color: #f4f4f4; /* Another placeholder */
     letter-spacing: 0.05em;
 }
 .heat-button {
     overflow: hidden;
-    background: linear-gradient(to right, #ff3b30 0%, #ff9500 0%, #696161bd 0%);
+    background: linear-gradient(to right, #8b3f00 0%, #d97706 0%, #212428 0%);
 }
 #btn-oil {
     pointer-events: none;
@@ -69,6 +69,8 @@ body {
     display: inline-block;
     min-width: 1ch;
     margin-left: 6px;
+    color: #ff8c1a;
+    font-weight: 700;
 }
 
 /* -------------------- GAME AREA + WHEEL ---------------- */
@@ -85,6 +87,7 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
+    border-radius: 18px;
 }
 #spin-wheel {
     width: 100%;
@@ -106,8 +109,8 @@ body {
     z-index: 10;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #d9ffbf;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65),  0 0 12px rgba(217, 255, 191, 0.35);
+    color: #ff9a1f;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65), 0 0 12px rgba(255, 154, 31, 0.35);
     animation: oil-float 900ms ease-out forwards;
     will-change: transform, opacity;
 }
@@ -123,4 +126,44 @@ body {
         opacity: 0;
         transform: translate(calc(-50% + 18px), -72px) scale(1.08)
     }
+}
+
+/* ------------UPGRADE PANEL STYLING --------------- */
+.upgrades-panel {
+    position: fixed;
+    left: -236px;
+    top: 120px;
+    width: 280px;
+    height: calc(100vh - 160px);
+    transform: translateX(0);
+    transition: transform 0.28s ease;
+    background: #212428;
+    border: 1px solid #ff9a1f;
+    border-left: none;
+    border-radius: 0 18px 18px 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: stretch;
+    overflow: hidden;
+}
+.upgrades-panel.open {
+    transform: translateX(236px);
+}
+.upgrades-toggle {
+    width: 44px;
+    border: none;
+    background: #2a2d33;
+    border-right: 1px solid #ff9a1f;
+    color: #f4f4f4;
+    font-size: 2rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.upgrades-content {
+    flex: 1;
+    padding: 16px;
 }

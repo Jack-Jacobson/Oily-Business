@@ -61,10 +61,7 @@ body {
     overflow: hidden;
     background: linear-gradient(to right, #8b3f00 0%, #d97706 0%, #212428 0%);
 }
-#btn-oil {
-    pointer-events: none;
-    cursor: default;
-}
+
 .oil-count {
     display: inline-block;
     min-width: 1ch;

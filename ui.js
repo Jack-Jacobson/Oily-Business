@@ -14,6 +14,9 @@ let money = 0;
 let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
+let isSpinning = false;
+const heatPerDegree = 10/ 360 //0% heat per turn
+const heatCooldownPerSec = 10; //10% heat per second
 
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
@@ -121,6 +124,10 @@ function updateDemand() {
     updateOilPanelUI();
 }
 
+function coolHeat() {
+    if(!isSpinning) addHeat(-heatCooldownPerSec);
+}
+
 function getDynamicOilPrice() {
     return oilPrice * (demand / 100);
 }
@@ -129,6 +136,12 @@ function updateOilPanelUI() {
     if (uiElements.oilSellPanel?.classList.contains('open') && uiElements.oilPriceValue) {
         uiElements.oilPriceValue.textContent = `$${getDynamicOilPrice().toFixed(2)}`;
     }
+}
+
+function addHeat(amount) {
+    heat += amount;
+    heat = Math.max(0, Math.min(100, heat));
+    updateHeatUI(heat);
 }
 
 /**
@@ -303,11 +316,15 @@ function initWheelDrag() {
             velocity = 0;
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
+            isSpinning = false;
             return;
         }
 
         currentRotation += velocity;
         totalRotationTravel += Math.abs(velocity);
+
+        addHeat(Math.abs(velocity) * heatPerDegree);
+
         checkRotationRewards();
 
         wheel.style.transform = `rotate(${currentRotation}deg)`;
@@ -318,7 +335,7 @@ function initWheelDrag() {
     // Calculates angles and prepares to spin wheel when click on the wheel
     wheel.addEventListener('pointerdown', (e) => {
         if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
+            cancelAnimationFrame(animationFrameId);updateDe
             animationFrameId = null;
         }
 
@@ -361,6 +378,7 @@ function initWheelDrag() {
         const center = getCenter(wheel);
         const currentAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
         const dist = Math.hypot(e.clientX - center.x, e.clientY - center.y);
+        isSpinning = true;
 
         let frameDiff = currentAngle - lastAngle;
 
@@ -372,6 +390,9 @@ function initWheelDrag() {
 
         currentRotation += appliedDiff;
         totalRotationTravel += Math.abs(appliedDiff);
+
+        addHeat(Math.abs(appliedDiff) *heatPerDegree);
+
         checkRotationRewards();
 
         wheel.style.transform = `rotate(${currentRotation}deg)`;
@@ -410,5 +431,5 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOilPanelUI();
 
     setInterval(updateDemand, 10000);
-
+    setInterval(coolHeat, 1000);
 });

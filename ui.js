@@ -13,6 +13,7 @@ let oilMultiplier = 1;
 let money = 0;
 let oilPrice = 78.50;
 let heat = 0;
+let demand = 100;
 
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
@@ -95,13 +96,39 @@ function addOil(amount) {
 function sellAllOil() {
     if(oilStored <= 0) return;
     
-    const earnings = oilStored * oilPrice;
+    const dynamicPrice = getDynamicOilPrice();
+    const earnings = oilStored * dynamicPrice;
 
     money += earnings;
     oilStored = 0;
 
     updateOilUI();
     updaetMoneyUI();
+}
+
+function updateDemand() {
+    const change = Math.floor(Math.random() * 4) + 1;
+    const goesUp = Math.random() < 0.5;
+
+    if (goesUp) {
+        demand += change;
+    } else {
+        demand -= change;
+    }
+
+    demand = Math.max(50, Math.min(150, demand));
+
+    updateOilPanelUI();
+}
+
+function getDynamicOilPrice() {
+    return oilPrice * (demand / 100);
+}
+
+function updateOilPanelUI() {
+    if (uiElements.oilSellPanel?.classList.contains('open') && uiElements.oilPriceValue) {
+        uiElements.oilPriceValue.textContent = `$${getDynamicOilPrice().toFixed(2)}`;
+    }
 }
 
 /**
@@ -130,9 +157,7 @@ function initOilPanel() {
     uiElements.btnOil?.addEventListener('click', () => {
         uiElements.oilSellPanel?.classList.toggle('open');
 
-        if(uiElements.oilPriceValue){
-            uiElements.oilPriceValue.textContent = `$${oilPrice.toFixed(2)}`;
-        }
+        updateOilPanelUI();
     });
 
     uiElements.sellOilBtn?.addEventListener('click', sellAllOil);
@@ -148,7 +173,8 @@ let saveData = {
     oilMultiplier: oilMultiplier,
     money: money,
     oilPrice: oilPrice,
-    heat: heat
+    heat: heat,
+    demand: demand
 }
 
 async function signData(data, secretKey) {
@@ -375,12 +401,14 @@ function initWheelDrag() {
 
 // Ensures html loaded then assigns logic
 document.addEventListener('DOMContentLoaded', () => {
-    initNavbarListeners(); // Initializes buttons
-    initWheelDrag(); // Initializes wheel spin
+    initNavbarListeners(); 
+    initWheelDrag(); 
     initUpgradesPanel();
     updaetMoneyUI();
     initOilPanel();
-
     updateOilUI();
+    updateOilPanelUI();
+
+    setInterval(updateDemand, 10000);
 
 });

@@ -36,7 +36,7 @@ const upgradeDefs = [
     },
     {
         title: 'Storage',
-        asset: 'assets/oil.png'
+        asset: 'assets/barrel.png'
     },
     {
         title: 'Automation',

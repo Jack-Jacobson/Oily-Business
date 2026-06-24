@@ -19,6 +19,31 @@ const heatPerDegree = 10/ 360 //10% heat gained per turn
 const heatCooldownPerSec = 10; 
 let overheatPopupShown = false;
 
+let upgradeLevels = [1, 1, 1, 1, 1];
+let upgradeCosts = [100, 150, 200, 250, 400]; 
+const upgradeDefs = [
+    {
+        title: 'Drill Power',
+        asset: 'assets/drill.png'
+    },
+    {
+        title: 'Spin Power',
+        asset: 'assets/piston.png'
+    },
+    {
+        title: 'Cooling',
+        asset: 'assets/fan.png'
+    },
+    {
+        title: 'Storage',
+        asset: 'assets/oil.png'
+    },
+    {
+        title: 'Automation',
+        asset: 'assets/robotarm.png'
+    }
+];
+
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
@@ -32,6 +57,7 @@ const uiElements = {
     wheel: document.getElementById('spin-wheel'),
     upgradesPanel: document.getElementById('upgrades-panel'),
     upgradesToggle: document.getElementById('upgrades-toggle'),
+    upgradesContent: document.getElementById('upgrades-content'),
 
     oilSellPanel: document.getElementById('oil-sell-panel'),
     oilPriceValue: document.getElementById('oil-price-value'),
@@ -187,9 +213,69 @@ function addHeat(amount) {
 function isOverheated() {
     return heat >= 100;
 }
+
+/** 
+ * Upgrades Content Creation
+ * renderUpgradesPanels creates HTMl for each button based on upgradesDef set for easy changing and adaptation
+ * Other two manage upgrade variables and keep panel live to variables
+ */
+function renderUpgradesPanel() {
+    if (!uiElements.upgradesContent) return;
+
+    uiElements.upgradesContent.innerHTML = upgradeDefs.map((upgrade, index) => `
+        <div class="upgrade-card">
+            <div class="upgrade-icon-wrap">
+                <img
+                    src="${upgrade.asset}"
+                    alt="${upgrade.title} Icon"
+                    class="upgrade-icon"
+                    draggable="false"
+                >
+            </div>
+
+            <div class="upgrade-meta">
+                <div class="upgrade-title">${upgrade.title}</div>
+                <div class="upgrade-level">level: <span id="upgrade-level-${index}">${upgradeLevels[index]}</span></div>
+                <button class="upgrade-buy-btn" id="upgrade-buy-${index}" type="button">$${upgradeCosts[index]}</button>
+            </div>
+        </div>
+    `).join('');
+
+    for (let i = 0; i < upgradeDefs.length; i++) {
+        const btn = document.getElementById(`upgrade-buy-${i}`);
+        if (btn) {
+            btn.addEventListener('click', () => buyUpgrade(i));
+        }
+    }
+}
+function updateUpgradePanelUI() {
+    for (let i = 0; i < upgradeDefs.length; i++) {
+        const levelEl = document.getElementById(`upgrade-level-${i}`);
+        const btnEl = document.getElementById(`upgrade-buy-${i}`);
+
+        if (levelEl) {
+            levelEl.textContent = upgradeLevels[i];
+        }
+
+        if (btnEl) {
+            btnEl.textContent = `$${upgradeCosts[i]}`;
+        }
+    }
+}
+function buyUpgrade(index) {
+    const cost = upgradeCosts[index];
+
+    if (money < cost) return;
+
+    money -= cost;
+    upgradeLevels[index] += 1;
+    upgradeCosts[index] = Math.ceil(cost * 1.35);
+
+    updateMoneyUi();
+    updateUpgradePanelUI();
+}
 /**
  * Attachese navigation listeners
- * CURRENTLY PLACEHOLDERS!
  */
 function initNavbarListeners() {
     uiElements.btnMoney?.addEventListener('click', () => console.log('Money clicked'));
@@ -477,6 +563,7 @@ function initWheelDrag() {
 document.addEventListener('DOMContentLoaded', () => {
     initNavbarListeners(); 
     initWheelDrag(); 
+    renderUpgradesPanel();
     initUpgradesPanel();
     updateMoneyUi();
     initOilPanel();

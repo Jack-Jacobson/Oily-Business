@@ -52,7 +52,7 @@ function spawnOilPopup(amount) {
 
     const popup = document.createElement('div');
     popup.className = 'oil-popup';
-    popup.textContent = `+${amount} oil`;
+    popup.textContent = `+${amount}  oil`;
 
     // Random offset
     popup.style.left = `${50 + (Math.random() * 8 - 4)}%`;

@@ -143,8 +143,12 @@ body {
         transform: translate(calc(-50% + 18px), -72px) scale(1.08)
     }
 }
-.oil-popup.overheat {
+.overheat-popup {
     color: #ff6a00;
+    animation-duration: 1900ms;
+    max-width: 260px;
+    text-align: center;
+    font-size: 1.8rem;
 }
 
 /* ------------UPGRADE PANEL STYLING --------------- */

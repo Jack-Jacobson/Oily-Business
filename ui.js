@@ -78,11 +78,16 @@ function spawnOilPopup(amount) {
     if (!container) return;
 
     const popup = document.createElement('div');
-    popup.className = 'oil-popup overheat';
+    popup.className = 'oil-popup';
     popup.textContent = `+${amount} oil`;
 
     // Random offset
-    popup.style.left = `${50 + (Math.random() * 8 - 4)}%`;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const xOffset = 170 + Math.random() * 80;
+    const yOffset = 50 + Math.random() * 70;
+
+    popup.style.left = `calc(50% + ${side * xOffset}px)`;
+    popup.style.top = `${yOffset}`;
 
     container.appendChild(popup);
 
@@ -96,10 +101,15 @@ function spawnOverheatPopup(amount) {
     if(!container) return;
 
     const popup = document.createElement('div');
-    popup.className = 'oil-popup';
+    popup.className = 'oil-popup overheat-popup';
     popup.innerHTML = `Drill overheated!<br>Stop and let it cool down.`;
 
-    popup.style.left = `${50 + (Math.random() * 8 - 4)}%`;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const xOffset = 170 + Math.random() * 80;
+    const yOffset = 70 + Math.random() * 70;
+
+    popup.style.left = `calc(50% + ${side * xOffset}px)`;
+    popup.style.top = `${yOffset}`;
 
     container.appendChild(popup);
 

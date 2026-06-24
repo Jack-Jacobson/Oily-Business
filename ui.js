@@ -12,8 +12,6 @@ let oilStored = 0;
 let oilMultiplier = 1;
 let money = 0;
 let oilPrice = 78.50;
-let oilStored = 0;
-let oilMultiplier = 1;
 let heat = 0;
 
 const uiElements = {

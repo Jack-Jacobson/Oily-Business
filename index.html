@@ -10,10 +10,10 @@
 
         <!-- -------------------NAVIGATION/ UI AT TOP --------->
         <header class="top-navbar"> 
-            <div class="nav-button" id="btn-money">
-                <img src="assets/money.png" alt="Money Icon" class="nav-icon">
-                <span class="nav-text">Money</span>
-            </div>
+            <span class="nav-text">
+                Money $
+                <span id="money-count" class="money-count">0.00</span>
+            </span>
 
             <div class="nav-button" id="btn-oil">
                 <img src="assets/oil.png" alt="Oil Icon" class="nav-icon">
@@ -33,6 +33,18 @@
             <div class="nav-button" id="btn-settings">
                 <img src="assets/settings.png" alt="Settings Icon" class="nav-icon">
                 <span class="nav-text">Settings</span>
+            </div>
+
+            <!-- -------------------OIL PANEL ------------------- -->
+             <div class="oil-sell-panel" id="oil-sell-panel">
+                <div class="oil-price-row">
+                    Current Price/Oil:
+                    <span id="oil-price-value">$78.50</span>
+                </div>
+
+                <button id="sell-oil-btn" class="sell-oil-btn">
+                    Sell All Oil
+                </button>
             </div>
 
         </header>

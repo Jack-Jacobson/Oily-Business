@@ -204,7 +204,7 @@ body {
     padding: 10px 12px;
     background: #2a2d33;
     border: 1px solid #183f70;
-    border-radius: 999px;
+    border-radius: 19px;
     overflow: hidden;
 }
 .upgrade-icon-warp {
@@ -281,6 +281,10 @@ body {
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.sell-oil-btn {
+    display: block;
+    margin: 0 auto 16px auto;
 }
 .sell-oil-btn:hover,
 .upgrade-buy-btn:hover {

@@ -121,14 +121,17 @@ function spawnOilPopup(amount) {
         popup.remove();
     }, { once: true });
 }
-
-function spawnOverheatPopup(amount) {
+/** 
+* NOTE: Adapted to have any message when called
+* @param {message} Any message you want with the overheat popup
+*/
+function spawnOverheatPopup(message = `Drill overheated!<br>Stop and let it cool down.`) {
     const container = uiElements.wheel?.parentElement;
     if(!container) return;
 
     const popup = document.createElement('div');
     popup.className = 'oil-popup overheat-popup';
-    popup.innerHTML = `Drill overheated!<br>Stop and let it cool down.`;
+    popup.innerHTML = message;
 
     const side = Math.random() < 0.5 ? -1 : 1;
     const xOffset = 170 + Math.random() * 80;
@@ -143,7 +146,9 @@ function spawnOverheatPopup(amount) {
         popup.remove();
     }, {once:true});
 }
-
+function spawnNotEnoughMoneyPopup() {
+    spawnOverheatPopup(`You can't afford that yet!`);
+}
 function addOil(amount) {
     oilStored += amount;
     updateOilUI();
@@ -265,7 +270,11 @@ function updateUpgradePanelUI() {
 function buyUpgrade(index) {
     const cost = upgradeCosts[index];
 
-    if (money < cost) return;
+    if (money < cost){ 
+        
+        spawnNotEnoughMoneyPopup();
+        return;
+    }
 
     money -= cost;
     upgradeLevels[index] += 1;

@@ -9,18 +9,20 @@
  * GLOBALS
  */
 let oilStored = 0;
+let maxOilStorage = 10;
 let oilMultiplier = 1;
 let money = 0;
 let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
 let isSpinning = false;
-const heatPerDegree = 10/ 360 //10% heat gained per turn
-const heatCooldownPerSec = 10; 
+const heatPerDegree = 5 / 360 //10% heat gained per turn
+const heatCooldownPerSec = 15; 
 let overheatPopupShown = false;
+let oilFullPopupShown = false;
 
 let upgradeLevels = [1, 1, 1, 1, 1];
-let upgradeCosts = [100, 150, 200, 250, 400]; 
+let upgradeCosts = [100, 150, 200, 1800, 400]; 
 const upgradeDefs = [
     {
         title: 'Drill Power',
@@ -89,7 +91,7 @@ function updateHeatUI(heatValue) {
 
 function updateOilUI() {
     if (uiElements.oilCount) {
-        uiElements.oilCount.textContent = oilStored;
+        uiElements.oilCount.textContent = `${oilStored}/${maxOilStorage}`;
     }
 }
 
@@ -117,7 +119,7 @@ function spawnOilPopup(amount) {
 
     container.appendChild(popup);
 
-    popup.addEventListener('animationend', () => {
+    popup.addEventListener('animationend', () => {Heat
         popup.remove();
     }, { once: true });
 }
@@ -149,10 +151,26 @@ function spawnOverheatPopup(message = `Drill overheated!<br>Stop and let it cool
 function spawnNotEnoughMoneyPopup() {
     spawnOverheatPopup(`You can't afford that yet!`);
 }
+function spawnStorageFullPopup() {
+    if(!oilFullPopupShown){
+        spawnOverheatPopup(`Your oil storage is full!\nClick the "oil" button to sell!`);
+    }
+}
 function addOil(amount) {
-    oilStored += amount;
+
+    if(oilStored >= maxOilStorage){
+        spawnStorageFullPopup();
+        oilFullPopupShown = true;
+        return;
+    }
+
+    const amountAdded = Math.min(amount, maxOilStorage-oilStored);
+
+    oilStored += amountAdded;
+    oilFullPopupShown = false;
+
     updateOilUI();
-    spawnOilPopup(amount);
+    spawnOilPopup(amountAdded);
 }
 
 function sellAllOil() {
@@ -280,7 +298,13 @@ function buyUpgrade(index) {
 
     money -= cost;
     upgradeLevels[index] += 1;
-    upgradeCosts[index] = Math.ceil(cost * 1.35);
+    
+    if(index === 3){
+        maxOilStorage *= 2;
+        upgradeCosts[index] *= 1.7;
+
+        updateOilUI();
+    }
 
     updateMoneyUi();
     updateUpgradePanelUI();

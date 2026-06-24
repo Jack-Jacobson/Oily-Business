@@ -120,7 +120,6 @@ body {
 #oil-rig-extended {
     opacity: 0;
     transform: translateX(-50%) translateY(6px);
-    transition: opacity 0.8s linear, transform 0.18s ease-out;
 }
 #oil-rig-extended.visible {
     opacity: 1;

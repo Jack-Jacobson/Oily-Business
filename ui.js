@@ -174,8 +174,10 @@ function updateDemand() {
 
     if (goesUp) {
         demand += change;
+        console.log(`Increased ${change}% to ${demand}% of original`)
     } else {
         demand -= change;
+        console.log(`Decresed ${change}% to ${demand}% of original`)
     }
 
     demand = Math.max(50, Math.min(150, demand));

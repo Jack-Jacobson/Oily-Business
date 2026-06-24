@@ -312,7 +312,7 @@ function initWheelDrag() {
         velocity *= friction;
 
         // Once spinning very slowly just stop, adjust as necessary
-        if (Math.abs(velocity) < 0.01) {
+        if (Math.abs(velocity) < 0.04) {
             velocity = 0;
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
@@ -335,9 +335,10 @@ function initWheelDrag() {
     // Calculates angles and prepares to spin wheel when click on the wheel
     wheel.addEventListener('pointerdown', (e) => {
         if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);updateDe
+            cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
+        isSpinning = true;
 
         velocity = 0;
 
@@ -378,7 +379,6 @@ function initWheelDrag() {
         const center = getCenter(wheel);
         const currentAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x) * (180 / Math.PI);
         const dist = Math.hypot(e.clientX - center.x, e.clientY - center.y);
-        isSpinning = true;
 
         let frameDiff = currentAngle - lastAngle;
 

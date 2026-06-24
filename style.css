@@ -100,7 +100,6 @@ body {
     position: absolute;
     top: 0;
     transform-origin: center center;
-    transform: translateX(-50%);
     z-index: 2;
 }
 #oil-rig {

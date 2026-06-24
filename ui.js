@@ -16,8 +16,8 @@ let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
 let isSpinning = false;
-const heatPerDegree = 10/ 360 //10% heat gained per turn
-const heatCooldownPerSec = 10; 
+const heatPerDegree = 5 / 360 //10% heat gained per turn
+const heatCooldownPerSec = 15; 
 let overheatPopupShown = false;
 let oilFullPopupShown = false;
 
@@ -119,7 +119,7 @@ function spawnOilPopup(amount) {
 
     container.appendChild(popup);
 
-    popup.addEventListener('animationend', () => {
+    popup.addEventListener('animationend', () => {Heat
         popup.remove();
     }, { once: true });
 }

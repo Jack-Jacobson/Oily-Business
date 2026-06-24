@@ -5,16 +5,33 @@
  * 
  */
 
+/**
+ * GLOBALS
+ */
+let oilStored = 0;
+let oilMultiplier = 1;
+let money = 0;
+let oilPrice = 78.50;
+let heat = 0;
+let demand = 100;
+
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
     btnHeat: document.getElementById('btn-heat'),
     btnAchievement: document.getElementById('btn-achievement'),
     btnSettings: document.getElementById('btn-settings'),
+
     oilCount: document.getElementById('oil-count'),
+    moneyCount: document.getElementById('money-count'),
+
     wheel: document.getElementById('spin-wheel'),
     upgradesPanel: document.getElementById('upgrades-panel'),
-    upgradesToggle: document.getElementById('upgrades-toggle')
+    upgradesToggle: document.getElementById('upgrades-toggle'),
+
+    oilSellPanel: document.getElementById('oil-sell-panel'),
+    oilPriceValue: document.getElementById('oil-price-value'),
+    sellOilBtn: document.getElementById('sell-oil-btn')
 };
 
 /** 
@@ -37,12 +54,18 @@ function updateHeatUI(heatValue) {
  * Helper functions to control amount of oil stored and make it pop up on screen
  * @param {number} amount - Amount of oil to display on popup/add to total count.
  */
-let oilStored = 0;
-let oilMultiplier = 1;
+
+
 
 function updateOilUI() {
     if (uiElements.oilCount) {
         uiElements.oilCount.textContent = oilStored;
+    }
+}
+
+function updaetMoneyUI(){
+    if (uiElements.moneyCount){
+        uiElements.moneyCount.textContent = money.toFixed(2);
     }
 }
 
@@ -70,6 +93,44 @@ function addOil(amount) {
     spawnOilPopup(amount);
 }
 
+function sellAllOil() {
+    if(oilStored <= 0) return;
+    
+    const dynamicPrice = getDynamicOilPrice();
+    const earnings = oilStored * dynamicPrice;
+
+    money += earnings;
+    oilStored = 0;
+
+    updateOilUI();
+    updaetMoneyUI();
+}
+
+function updateDemand() {
+    const change = Math.floor(Math.random() * 4) + 1;
+    const goesUp = Math.random() < 0.5;
+
+    if (goesUp) {
+        demand += change;
+    } else {
+        demand -= change;
+    }
+
+    demand = Math.max(50, Math.min(150, demand));
+
+    updateOilPanelUI();
+}
+
+function getDynamicOilPrice() {
+    return oilPrice * (demand / 100);
+}
+
+function updateOilPanelUI() {
+    if (uiElements.oilSellPanel?.classList.contains('open') && uiElements.oilPriceValue) {
+        uiElements.oilPriceValue.textContent = `$${getDynamicOilPrice().toFixed(2)}`;
+    }
+}
+
 /**
  * Attachese navigation listeners
  * CURRENTLY PLACEHOLDERS!
@@ -92,15 +153,28 @@ function initUpgradesPanel() {
     });
 }
 
+function initOilPanel() {
+    uiElements.btnOil?.addEventListener('click', () => {
+        uiElements.oilSellPanel?.classList.toggle('open');
+
+        updateOilPanelUI();
+    });
+
+    uiElements.sellOilBtn?.addEventListener('click', sellAllOil);
+}
+
 /**
  * Save data functions and variables
  * Add all variables here ( you may need to change this to be in a function depending on how you setup Global vars ) for save files.
  */
 
-const saveData = {
+let saveData = {
     oilStored: oilStored,
     oilMultiplier: oilMultiplier,
-    heat: 50
+    money: money,
+    oilPrice: oilPrice,
+    heat: heat,
+    demand: demand
 }
 
 async function signData(data, secretKey) {
@@ -327,10 +401,14 @@ function initWheelDrag() {
 
 // Ensures html loaded then assigns logic
 document.addEventListener('DOMContentLoaded', () => {
-    initNavbarListeners(); // Initializes buttons
-    initWheelDrag(); // Initializes wheel spin
+    initNavbarListeners(); 
+    initWheelDrag(); 
     initUpgradesPanel();
-
+    updaetMoneyUI();
+    initOilPanel();
     updateOilUI();
+    updateOilPanelUI();
+
+    setInterval(updateDemand, 10000);
 
 });

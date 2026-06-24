@@ -61,10 +61,6 @@ body {
     overflow: hidden;
     background: linear-gradient(to right, #8b3f00 0%, #d97706 0%, #212428 0%);
 }
-#btn-oil {
-    pointer-events: none;
-    cursor: default;
-}
 .oil-count {
     display: inline-block;
     min-width: 1ch;
@@ -72,7 +68,10 @@ body {
     color: #ff8c1a;
     font-weight: 700;
 }
-
+.money-count {
+    color: #ff8c1a;
+    margin-left: 6px;
+}
 /* -------------------- GAME AREA + WHEEL ---------------- */
 .game-container {
     display: flex;
@@ -183,4 +182,50 @@ body {
 .upgrades-content {
     flex: 1;
     padding: 16px;
+}
+/** ----------------------OIL PANEL STYLING--------------*/
+.oil-sell-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #212428;
+    border: 1px solid #ff9a1f;
+    border-top: none;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    border-radius: 14px;
+    transition:
+        max-height 0.25s ease,
+        opacity 0.15s ease,
+        transform 0.25s ease;
+}
+.oil-sell-panel.open {
+    max-height: 140px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.oil-price-row {
+    color: #f4f4f4;
+    padding: 16px;
+    font-size: 1.1rem;
+}
+.sell-oil-btn {
+    margin: 0 16px 16px 16px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ff9a1f;
+    color: #111;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.oil-container {
+    position: relative;
+    flex: 1 1 0;
 }

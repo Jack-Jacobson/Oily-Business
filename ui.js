@@ -14,6 +14,9 @@ let money = 0;
 let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
+const rigFrameIntervalMs = 1600;
+let rigFrameTimerId = null;
+let rigFrameExtended = false;
 
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
@@ -31,7 +34,10 @@ const uiElements = {
 
     oilSellPanel: document.getElementById('oil-sell-panel'),
     oilPriceValue: document.getElementById('oil-price-value'),
-    sellOilBtn: document.getElementById('sell-oil-btn')
+        sellOilBtn: document.getElementById('sell-oil-btn'),
+
+    oilRigBase: document.getElementById('oil-rig-base'),
+    oilRigExtended: document.getElementById('oil-rig-extended')
 };
 
 /** 
@@ -163,6 +169,22 @@ function initOilPanel() {
     uiElements.sellOilBtn?.addEventListener('click', sellAllOil);
 }
 
+function startRigAnimation(){
+    if(rigFrameTimerId) {
+        clearInterval(rigFrameTimerId);
+        rigFrameTimerId = null;
+    }
+
+    const applyFrame = () => {
+        rigFrameExtended = !rigFrameExtended;
+
+        uiElements.oilRigBase?.classList.toggle('hidden', rigFrameExtended);
+        uiElements.oilRigExtended?.classList.toggle('visible', rigFrameExtended);
+    };
+
+    applyFrame();
+    rigFrameTimerId = setInterval(applyFrame, rigFrameIntervalMs);
+}
 /**
  * Save data functions and variables
  * Add all variables here ( you may need to change this to be in a function depending on how you setup Global vars ) for save files.
@@ -408,6 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initOilPanel();
     updateOilUI();
     updateOilPanelUI();
+    startRigAnimation();
 
     setInterval(updateDemand, 10000);
 

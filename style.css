@@ -111,7 +111,7 @@ body {
     user-select: none;
     pointer-events: none;
     -webkit-user-drag: none;
-    object-fit: contian;
+    object-fit: contain;
     z-index: 1;
 }
 #oil-rig-base {

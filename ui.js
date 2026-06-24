@@ -144,6 +144,9 @@ function addHeat(amount) {
     updateHeatUI(heat);
 }
 
+function isOverheated() {
+    return heat >= 100;
+}
 /**
  * Attachese navigation listeners
  * CURRENTLY PLACEHOLDERS!
@@ -338,7 +341,6 @@ function initWheelDrag() {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
-        isSpinning = true;
 
         velocity = 0;
 
@@ -352,6 +354,11 @@ function initWheelDrag() {
             return;
         }
 
+        if(isOverheated()) {
+            return;
+        }
+
+        isSpinning = true;
         isDragging = true;
         wheel.style.cursor = 'grabbing';
 
@@ -373,6 +380,12 @@ function initWheelDrag() {
             } else {
                 wheel.style.cursor = 'not-allowed';
             }
+            return;
+        }
+        if(isOverheated()){
+            isDragging = false;
+            velocity = 0;
+            isSpinning = false;
             return;
         }
 

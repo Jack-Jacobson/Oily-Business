@@ -31,7 +31,7 @@ let overheatPopupShown = false;
 let oilFullPopupShown = false;
 
 let upgradeLevels = [1, 1, 1, 1, 1];
-let upgradeCosts = [100, 150, 200, 1800, 400]; 
+let upgradeCosts = [2500, 1500, 1800, 1800, 400]; 
 const upgradeDefs = [
     {
         title: 'Drill Power',

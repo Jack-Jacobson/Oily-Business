@@ -10,14 +10,23 @@
  */
 let oilStored = 0;
 let maxOilStorage = 10;
-let oilMultiplier = 1;
 let money = 0;
 let oilPrice = 78.50;
 let heat = 0;
 let demand = 100;
+
 let isSpinning = false;
-const heatPerDegree = 5 / 360 //10% heat gained per turn
-const heatCooldownPerSec = 15; 
+
+const baseHeatPerDegree = 5 / 360 //10% heat gained per turn
+const baseHeatCooldownPerSec = 15; 
+
+let heatPerDegree = baseHeatPerDegree;
+let heatCooldownPerSec = baseHeatCooldownPerSec;
+
+let oilMultiplier = 1;
+let spinPowerMultiplier = 1;
+let coolingMultiplier = 1;
+
 let overheatPopupShown = false;
 let oilFullPopupShown = false;
 
@@ -119,7 +128,7 @@ function spawnOilPopup(amount) {
 
     container.appendChild(popup);
 
-    popup.addEventListener('animationend', () => {Heat
+    popup.addEventListener('animationend', () => {
         popup.remove();
     }, { once: true });
 }
@@ -155,6 +164,27 @@ function spawnStorageFullPopup() {
     if(!oilFullPopupShown){
         spawnOverheatPopup(`Your oil storage is full!\nClick the "oil" button to sell!`);
     }
+}
+function updateUpgradeEffects() {
+    oilMultiplier = Math.pow(1.3, upgradeLevels[0]-1);
+    spinPowerMultiplier = Math.pow(1.2, upgradeLevels[1]-1);
+    coolingMultiplier = Math.pow(1.2, upgradeLevels[2]-1);
+
+    heatperDegree = baseHeatPerDegree / coolingMultiplier;
+    heatCooldownPerSec = baseHeatCooldownPerSec * coolingMultiplier;
+
+    maxOilStorage = 10 * Math.pow(2, upgradeLevels[3]-1);
+}
+function getUpgradeSubtext(index) {
+    const texts = [
+        'Increases oil per spin by 30%',
+        'Increases manual spin power by 20%',
+        'Increases cooling by 20%',
+        'Increases storage by 100%',
+        'No effect yet'
+    ];
+
+    return texts[index] ?? '';
 }
 function addOil(amount) {
 
@@ -261,6 +291,7 @@ function renderUpgradesPanel() {
             <div class="upgrade-meta">
                 <div class="upgrade-title">${upgrade.title}</div>
                 <div class="upgrade-level">level: <span id="upgrade-level-${index}">${upgradeLevels[index]}</span></div>
+                <div class="upgrade-subtext" id="upgrade-subtext-${index}">${getUpgradeSubtext(index)}</div>
                 <button class="upgrade-buy-btn" id="upgrade-buy-${index}" type="button">$${upgradeCosts[index]}</button>
             </div>
         </div>
@@ -276,10 +307,15 @@ function renderUpgradesPanel() {
 function updateUpgradePanelUI() {
     for (let i = 0; i < upgradeDefs.length; i++) {
         const levelEl = document.getElementById(`upgrade-level-${i}`);
+        const subtextEl = document.getElementById(`upgrade-subtext-${i}`);
         const btnEl = document.getElementById(`upgrade-buy-${i}`);
 
         if (levelEl) {
             levelEl.textContent = upgradeLevels[i];
+        }
+
+        if (subtextEl) {
+            subtextEl.textContent = getUpgradeSubtext(i);
         }
 
         if (btnEl) {
@@ -287,26 +323,38 @@ function updateUpgradePanelUI() {
         }
     }
 }
+
 function buyUpgrade(index) {
     const cost = upgradeCosts[index];
 
-    if (money < cost){ 
-        
+    if (money < cost) { 
         spawnNotEnoughMoneyPopup();
         return;
     }
 
     money -= cost;
     upgradeLevels[index] += 1;
-    
-    if(index === 3){
-        maxOilStorage *= 2;
-        upgradeCosts[index] *= 1.7;
 
-        updateOilUI();
+    if (index === 0) {
+        upgradeCosts[index] = Math.ceil(cost * 1.8);
+    }
+    else if (index === 1) {
+        upgradeCosts[index] = Math.ceil(cost * 1.6);
+    }
+    else if (index === 2) {
+        upgradeCosts[index] = Math.ceil(cost * 1.6);
+    }
+    else if (index === 3) {
+        maxOilStorage *= 2;
+        upgradeCosts[index] = Math.ceil(cost * 3);
+    }
+    else if (index === 4) {
+        upgradeCosts[index] = Math.ceil(cost * 1.6);
     }
 
+    updateUpgradeEffects();
     updateMoneyUi();
+    updateOilUI();
     updateUpgradePanelUI();
 }
 /**
@@ -560,7 +608,7 @@ function initWheelDrag() {
         if (frameDiff < -180) frameDiff += 360;
 
         const grabStrength = getGrabStrength(dist, center.radius);
-        const appliedDiff = frameDiff * grabStrength;
+        const appliedDiff = frameDiff * grabStrength * spinPowerMultiplier;
 
         currentRotation += appliedDiff;
         totalRotationTravel += Math.abs(appliedDiff);

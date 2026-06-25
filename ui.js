@@ -336,7 +336,7 @@ function buyUpgrade(index) {
     upgradeLevels[index] += 1;
 
     if (index === 0) {
-        upgradeCosts[index] = Math.ceil(cost * 1.8);
+        upgradeCosts[index] = Math.ceil(cost * 1.6);
     }
     else if (index === 1) {
         upgradeCosts[index] = Math.ceil(cost * 1.6);
@@ -346,7 +346,7 @@ function buyUpgrade(index) {
     }
     else if (index === 3) {
         maxOilStorage *= 2;
-        upgradeCosts[index] = Math.ceil(cost * 3);
+        upgradeCosts[index] = Math.ceil(cost * 1.6);
     }
     else if (index === 4) {
         upgradeCosts[index] = Math.ceil(cost * 1.6);

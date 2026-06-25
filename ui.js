@@ -72,7 +72,11 @@ const uiElements = {
 
     oilSellPanel: document.getElementById('oil-sell-panel'),
     oilPriceValue: document.getElementById('oil-price-value'),
-    sellOilBtn: document.getElementById('sell-oil-btn')
+    sellOilBtn: document.getElementById('sell-oil-btn'),
+
+    btnSave: document.getElementById('btn-save'),
+    btnLoad: document.getElementById('btn-load'),
+    fileLoad: document.getElementById('file-load')
 };
 
 /** 
@@ -393,13 +397,50 @@ function initOilPanel() {
  * Add all variables here ( you may need to change this to be in a function depending on how you setup Global vars ) for save files.
  */
 
-let saveData = {
-    oilStored: oilStored,
-    oilMultiplier: oilMultiplier,
-    money: money,
-    oilPrice: oilPrice,
-    heat: heat,
-    demand: demand
+const SECRET_KEY = "oily_business_secret"; 
+
+function handleSave() {
+    const currentData = {
+        oilStored: oilStored,
+        money: money,
+        heat: heat,
+        demand: demand,
+        upgradeLevels: upgradeLevels,
+        upgradeCosts: upgradeCosts
+    };
+    
+    exportSave(currentData, SECRET_KEY);
+}
+
+async function handleLoad(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const loadedData = await loadSave(file, SECRET_KEY);
+        
+        oilStored = loadedData.oilStored || 0;
+        money = loadedData.money || 0;
+        heat = loadedData.heat || 0;
+        demand = loadedData.demand || 100;
+        
+        if (loadedData.upgradeLevels) upgradeLevels = [...loadedData.upgradeLevels];
+        if (loadedData.upgradeCosts) upgradeCosts = [...loadedData.upgradeCosts];
+
+        updateUpgradeEffects();
+        
+        updateOilUI();
+        updateMoneyUi();
+        updateHeatUI(heat);
+        updateOilPanelUI();
+        updateUpgradePanelUI();
+        
+    } catch (e) {
+        console.error("Failed to load save:", e);
+        alert("Save file is corrupted or invalid.");
+    }
+    
+    event.target.value = ''; 
 }
 
 async function signData(data, secretKey) {
@@ -652,6 +693,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initOilPanel();
     updateOilUI();
     updateOilPanelUI();
+
+    uiElements.btnSave?.addEventListener('click', handleSave);
+    uiElements.btnLoad?.addEventListener('click', () => uiElements.fileLoad?.click());
+    uiElements.fileLoad?.addEventListener('change', handleLoad);
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

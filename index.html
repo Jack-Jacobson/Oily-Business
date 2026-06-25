@@ -65,13 +65,17 @@
             <div class="upgrades-content" id="upgrades-content"></div>
         </aside>
 
-        <!-- ------------ SPINNY WHEEL + RIG --------------- -->
+        <!-- ------------ SPINNY WHEEL + RIG + Auto toggle--------------- -->
         <main class="game-container">
             <div class="wheel-container">
                 <img src="assets/rig.png" id="oil-rig" alt="Oil Rig" draggable="false">
                 <img src="assets/wheel.png" id="spin-wheel" alt="Spinning Wheel" draggable="false">
             </div>
         </main>
+
+        <div id="auto-toggle-container" style="display: none; justify-content: center; margin-top: 20px; position: relative; z-index: 10;">
+                <button id="btn-auto-toggle" class="sell-oil-btn" style="margin: 0;">Auto Spin: OFF</button>
+        </div>
 
         <!-- -------------- BOTTOM BUTTONS ----------------- -->
         <div class="bottom-controls">

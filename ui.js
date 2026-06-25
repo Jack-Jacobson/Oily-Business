@@ -55,6 +55,9 @@ const upgradeDefs = [
     }
 ];
 
+let autoSpinEnabled = false;
+let autoVelocity = 0;
+
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
@@ -169,26 +172,34 @@ function spawnStorageFullPopup() {
         spawnOverheatPopup(`Your oil storage is full!\nClick the "oil" button to sell!`);
     }
 }
-function updateUpgradeEffects() {
-    oilMultiplier = Math.pow(1.3, upgradeLevels[0]-1);
-    spinPowerMultiplier = Math.pow(1.2, upgradeLevels[1]-1);
-    coolingMultiplier = Math.pow(1.2, upgradeLevels[2]-1);
-
-    heatperDegree = baseHeatPerDegree / coolingMultiplier;
-    heatCooldownPerSec = baseHeatCooldownPerSec * coolingMultiplier;
-
-    maxOilStorage = 10 * Math.pow(2, upgradeLevels[3]-1);
-}
 function getUpgradeSubtext(index) {
     const texts = [
         'Increases oil per spin by 30%',
         'Increases manual spin power by 20%',
         'Increases cooling by 20%',
         'Increases storage by 100%',
-        'No effect yet'
+        'Increases auto spin by 50%'
     ];
 
     return texts[index] ?? '';
+}
+
+function updateUpgradeEffects() {
+    oilMultiplier = Math.pow(1.3, upgradeLevels[0]-1);
+    spinPowerMultiplier = Math.pow(1.2, upgradeLevels[1]-1);
+    coolingMultiplier = Math.pow(1.2, upgradeLevels[2]-1);
+
+    heatPerDegree = baseHeatPerDegree / coolingMultiplier; 
+    heatCooldownPerSec = baseHeatCooldownPerSec * coolingMultiplier;
+
+    maxOilStorage = 10 * Math.pow(2, upgradeLevels[3]-1);
+
+    autoVelocity = upgradeLevels[4] > 1 ? 1.0 * Math.pow(1.5, upgradeLevels[4] - 2) : 0;
+    
+    const autoContainer = document.getElementById('auto-toggle-container');
+    if (autoContainer && upgradeLevels[4] > 1) {
+        autoContainer.style.display = 'flex';
+    }
 }
 function addOil(amount) {
 
@@ -423,6 +434,16 @@ async function handleLoad(event) {
         money = loadedData.money || 0;
         heat = loadedData.heat || 0;
         demand = loadedData.demand || 100;
+        autoSpinEnabled = loadedData.autoSpinEnabled || false;
+        
+        const btnAuto = document.getElementById('btn-auto-toggle');
+        if (btnAuto) {
+            btnAuto.textContent = `Auto Spin: ${autoSpinEnabled ? 'ON' : 'OFF'}`;
+            btnAuto.style.color = autoSpinEnabled ? '#111' : '#ff9a1f';
+            btnAuto.style.background = autoSpinEnabled ? '#ff9a1f' : 'transparent';
+        }
+        
+        window.dispatchEvent(new Event('startAutoSpin'));
         
         if (loadedData.upgradeLevels) upgradeLevels = [...loadedData.upgradeLevels];
         if (loadedData.upgradeCosts) upgradeCosts = [...loadedData.upgradeCosts];
@@ -518,6 +539,27 @@ function initWheelDrag() {
     const wheel = uiElements.wheel;
     if (!wheel) return;
 
+    const btnAutoToggle = document.getElementById('btn-auto-toggle');
+    if (btnAutoToggle) {
+        btnAutoToggle.addEventListener('click', () => {
+            autoSpinEnabled = !autoSpinEnabled;
+            btnAutoToggle.textContent = `Auto Spin: ${autoSpinEnabled ? 'ON' : 'OFF'}`;
+            btnAutoToggle.style.color = autoSpinEnabled ? '#111' : '#ff9a1f';
+            btnAutoToggle.style.background = autoSpinEnabled ? '#ff9a1f' : 'transparent';
+            
+            // Kickstart the physics loop if it's dead
+            if (autoSpinEnabled && !isDragging && !animationFrameId) {
+                animationFrameId = requestAnimationFrame(updateInertia);
+            }
+        });
+    }
+
+    window.addEventListener('startAutoSpin', () => {
+        if (autoSpinEnabled && !isDragging && !animationFrameId) {
+            animationFrameId = requestAnimationFrame(updateInertia);
+        }
+    });
+
     wheel.draggable = false;
     wheel.addEventListener('dragstart', (e) => e.preventDefault());
 
@@ -562,22 +604,39 @@ function initWheelDrag() {
     function updateInertia() {
         if (isDragging) return;
 
-        velocity *= friction;
+        let targetVelocity = (autoSpinEnabled && autoVelocity > 0 && !isOverheated()) ? autoVelocity : 0;
 
-        // Once spinning very slowly just stop, adjust as necessary
+        if (targetVelocity === 0) {
+            velocity *= friction;
+        } else {
+            if (velocity > targetVelocity) {
+                velocity *= friction;
+                if (velocity < targetVelocity) velocity = targetVelocity;
+            } else if (velocity < targetVelocity) {
+                velocity += 0.08; 
+                if (velocity > targetVelocity) velocity = targetVelocity;
+            }
+        }
+
         if (Math.abs(velocity) < 0.04) {
             velocity = 0;
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-            isSpinning = false;
-            return;
+        }
+
+        if (velocity === 0 && targetVelocity === 0) {
+            isSpinning = false; // Flags coolHeat() to start cooling
+            if (!autoSpinEnabled) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+                return; // Kill the loop entirely to save CPU
+            }
+        } else {
+            isSpinning = true;
         }
 
         currentRotation += velocity;
         totalRotationTravel += Math.abs(velocity);
 
         addHeat(Math.abs(velocity) * heatPerDegree);
-
         checkRotationRewards();
 
         wheel.style.transform = `rotate(${currentRotation}deg)`;

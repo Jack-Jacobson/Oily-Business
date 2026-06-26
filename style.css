@@ -101,31 +101,18 @@ body {
     transform-origin: center center;
     z-index: 2;
 }
-#oil-rig-base, #oil-rig-extended {
+#oil-rig {
     position: absolute;
     width: 350px;
-    height: auto;
-    left: 50%;
+    height: 350px;
+    object-fit: contain;
     bottom: -20px;
+    left: 50%;
     transform: translateX(-50%);
+    z-index: 1;
     user-select: none;
     pointer-events: none;
     -webkit-user-drag: none;
-    object-fit: contain;
-    z-index: 1;
-    transition: opacity 0.2s ease;
-}
-#oil-rig-base {
-    opacity: 1;
-}
-#oil-rig-extended {
-    opacity: 0;
-}
-#oil-rig-extended.visible {
-    opacity: 1;
-}
-#oil-rig-base.hidden {
-    opacity: 0;
 }
 
 /* ------------------- POPUPS ------------------ */

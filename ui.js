@@ -58,10 +58,6 @@ const upgradeDefs = [
 let autoSpinEnabled = false;
 let autoVelocity = 0;
 
-const rigFrameIntervalMs = 1600;
-let rigFrameTimerId = null;
-let rigFrameExtended = false;
-
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
@@ -73,8 +69,6 @@ const uiElements = {
     moneyCount: document.getElementById('money-count'),
 
     wheel: document.getElementById('spin-wheel'),
-    oilRigBase: document.getElementById('oil-rig-base'),
-    oilRigExtended: document.getElementById('oil-rig-extended'),
     upgradesPanel: document.getElementById('upgrades-panel'),
     upgradesToggle: document.getElementById('upgrades-toggle'),
     upgradesContent: document.getElementById('upgrades-content'),
@@ -378,22 +372,6 @@ function buyUpgrade(index) {
     updateOilUI();
     updateUpgradePanelUI();
 }
-function startRigAnimation() {
-    if (rigFrameTimerId) {
-        clearInterval(rigFrameTimerId);
-        rigFrameTimerId = null;
-    }
-
-    const applyFrame = () => {
-        rigFrameExtended = !rigFrameExtended;
-        uiElements.oilRigBase?.classList.toggle('hidden', rigFrameExtended);
-        uiElements.oilRigExtended?.classList.toggle('visible', rigFrameExtended);
-    };
-
-    applyFrame();
-    rigFrameTimerId = setInterval(applyFrame, rigFrameIntervalMs);
-}
-
 /**
  * Attachese navigation listeners
  */
@@ -778,8 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
     uiElements.btnSave?.addEventListener('click', handleSave);
     uiElements.btnLoad?.addEventListener('click', () => uiElements.fileLoad?.click());
     uiElements.fileLoad?.addEventListener('change', handleLoad);
-
-    startRigAnimation();
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

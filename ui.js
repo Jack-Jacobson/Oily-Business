@@ -27,6 +27,19 @@ let oilMultiplier = 1;
 let spinPowerMultiplier = 1;
 let coolingMultiplier = 1;
 
+const NUMBER_PRECISION = 2;
+
+function roundTo(value, decimals = NUMBER_PRECISION) {
+    const factor = 10 ** decimals;
+    return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+function formatNumber(value, decimals = NUMBER_PRECISION) {
+    return roundTo(value, decimals)
+        .toFixed(decimals)
+        .replace(/\.?0+$/, '');
+}
+
 let overheatPopupShown = false;
 let oilFullPopupShown = false;
 
@@ -58,10 +71,6 @@ const upgradeDefs = [
 let autoSpinEnabled = false;
 let autoVelocity = 0;
 
-const rigFrameIntervalMs = 1600;
-let rigFrameTimerId = null;
-let rigFrameExtended = false;
-
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
@@ -73,8 +82,6 @@ const uiElements = {
     moneyCount: document.getElementById('money-count'),
 
     wheel: document.getElementById('spin-wheel'),
-    oilRigBase: document.getElementById('oil-rig-base'),
-    oilRigExtended: document.getElementById('oil-rig-extended'),
     upgradesPanel: document.getElementById('upgrades-panel'),
     upgradesToggle: document.getElementById('upgrades-toggle'),
     upgradesContent: document.getElementById('upgrades-content'),
@@ -85,7 +92,11 @@ const uiElements = {
 
     btnSave: document.getElementById('btn-save'),
     btnLoad: document.getElementById('btn-load'),
-    fileLoad: document.getElementById('file-load')
+    fileLoad: document.getElementById('file-load'),
+
+    btnCredits: document.getElementById('btn-credits'),
+    creditsOverlay: document.getElementById('credits-overlay'),
+    creditsClose: document.getElementById('credits-close')
 };
 
 /** 
@@ -108,13 +119,13 @@ function updateHeatUI(heatValue) {
 
 function updateOilUI() {
     if (uiElements.oilCount) {
-        uiElements.oilCount.textContent = `${oilStored}/${maxOilStorage}`;
+        uiElements.oilCount.textContent = `${formatNumber(oilStored)}/${formatNumber(maxOilStorage)}`;
     }
 }
 
 function updateMoneyUi(){
     if (uiElements.moneyCount){
-        uiElements.moneyCount.textContent = money.toFixed(2);
+        uiElements.moneyCount.textContent = formatNumber(money);
     }
 }
 
@@ -124,7 +135,7 @@ function spawnOilPopup(amount) {
 
     const popup = document.createElement('div');
     popup.className = 'oil-popup';
-    popup.textContent = `+${amount} oil`;
+    popup.textContent = `+${formatNumber(amount)} oil`;
 
     // Random offset
     const side = Math.random() < 0.5 ? -1 : 1;
@@ -186,16 +197,16 @@ function getUpgradeSubtext(index) {
 }
 
 function updateUpgradeEffects() {
-    oilMultiplier = Math.pow(1.3, upgradeLevels[0]-1);
-    spinPowerMultiplier = Math.pow(1.2, upgradeLevels[1]-1);
-    coolingMultiplier = Math.pow(1.2, upgradeLevels[2]-1);
+    oilMultiplier = roundTo(Math.pow(1.3, upgradeLevels[0]-1));
+    spinPowerMultiplier = roundTo(Math.pow(1.2, upgradeLevels[1]-1));
+    coolingMultiplier = roundTo(Math.pow(1.2, upgradeLevels[2]-1));
 
-    heatPerDegree = baseHeatPerDegree / coolingMultiplier; 
-    heatCooldownPerSec = baseHeatCooldownPerSec * coolingMultiplier;
+    heatPerDegree = roundTo(baseHeatPerDegree / coolingMultiplier); 
+    heatCooldownPerSec = roundTo(baseHeatCooldownPerSec * coolingMultiplier);
 
-    maxOilStorage = 10 * Math.pow(2, upgradeLevels[3]-1);
+    maxOilStorage = roundTo(10 * Math.pow(2, upgradeLevels[3]-1));
 
-    autoVelocity = upgradeLevels[4] > 1 ? 1.0 * Math.pow(1.5, upgradeLevels[4] - 2) : 0;
+    autoVelocity = upgradeLevels[4] > 1 ? roundTo(1.0 * Math.pow(1.5, upgradeLevels[4] - 2)) : 0;
     
     const autoContainer = document.getElementById('auto-toggle-container');
     if (autoContainer && upgradeLevels[4] > 1) {
@@ -210,9 +221,9 @@ function addOil(amount) {
         return;
     }
 
-    const amountAdded = Math.min(amount, maxOilStorage-oilStored);
+    const amountAdded = roundTo(Math.min(amount, maxOilStorage-oilStored));
 
-    oilStored += amountAdded;
+    oilStored = roundTo(oilStored + amountAdded);
     oilFullPopupShown = false;
 
     updateOilUI();
@@ -223,9 +234,9 @@ function sellAllOil() {
     if(oilStored <= 0) return;
     
     const dynamicPrice = getDynamicOilPrice();
-    const earnings = oilStored * dynamicPrice;
+    const earnings = roundTo(oilStored * dynamicPrice);
 
-    money += earnings;
+    money = roundTo(money + earnings);
     oilStored = 0;
 
     updateOilUI();
@@ -254,19 +265,19 @@ function coolHeat() {
 }
 
 function getDynamicOilPrice() {
-    return oilPrice * (demand / 100);
+    return roundTo(oilPrice * (demand / 100));
 }
 
 function updateOilPanelUI() {
     if (uiElements.oilSellPanel?.classList.contains('open') && uiElements.oilPriceValue) {
-        uiElements.oilPriceValue.textContent = `$${getDynamicOilPrice().toFixed(2)}`;
+        uiElements.oilPriceValue.textContent = `$${formatNumber(getDynamicOilPrice())}`;
     }
 }
 
 function addHeat(amount) {
     const prevHeat = heat;
 
-    heat += amount;
+    heat = roundTo(heat + amount);
     heat = Math.max(0, Math.min(100, heat));
 
     updateHeatUI(heat);
@@ -373,29 +384,6 @@ function buyUpgrade(index) {
     updateOilUI();
     updateUpgradePanelUI();
 }
-function startRigAnimation() {
-    if (rigFrameTimerId) {
-        clearInterval(rigFrameTimerId);
-        rigFrameTimerId = null;
-    }
-
-    const applyFrame = () => {
-        if (!isSpinning) {
-            if (rigFrameExtended) {
-                rigFrameExtended = false;
-                uiElements.oilRigBase?.classList.remove('hidden');
-                uiElements.oilRigExtended?.classList.remove('visible');
-            }
-            return;
-        }
-        rigFrameExtended = !rigFrameExtended;
-        uiElements.oilRigBase?.classList.toggle('hidden', rigFrameExtended);
-        uiElements.oilRigExtended?.classList.toggle('visible', rigFrameExtended);
-    };
-
-    rigFrameTimerId = setInterval(applyFrame, rigFrameIntervalMs);
-}
-
 /**
  * Attachese navigation listeners
  */
@@ -454,9 +442,9 @@ async function handleLoad(event) {
     try {
         const loadedData = await loadSave(file, SECRET_KEY);
         
-        oilStored = loadedData.oilStored || 0;
-        money = loadedData.money || 0;
-        heat = loadedData.heat || 0;
+        oilStored = roundTo(loadedData.oilStored || 0);
+        money = roundTo(loadedData.money || 0);
+        heat = roundTo(loadedData.heat || 0);
         demand = loadedData.demand || 100;
         autoSpinEnabled = loadedData.autoSpinEnabled || false;
         
@@ -621,7 +609,7 @@ function initWheelDrag() {
     function checkRotationRewards() {
         while (totalRotationTravel >= 360) {
             totalRotationTravel -= 360;
-            addOil(1 * oilMultiplier);
+            addOil(roundTo(1 * oilMultiplier));
         }
     }
 
@@ -635,10 +623,10 @@ function initWheelDrag() {
             velocity *= friction;
         } else {
             if (velocity > targetVelocity) {
-                velocity *= friction;
+                velocity = roundTo(velocity * friction);
                 if (velocity < targetVelocity) velocity = targetVelocity;
             } else if (velocity < targetVelocity) {
-                velocity += 0.08; 
+                velocity = roundTo(velocity + 0.08); 
                 if (velocity > targetVelocity) velocity = targetVelocity;
             }
         }
@@ -658,13 +646,13 @@ function initWheelDrag() {
             isSpinning = true;
         }
 
-        currentRotation += velocity;
-        totalRotationTravel += Math.abs(velocity);
+        currentRotation = roundTo(currentRotation + velocity);
+        totalRotationTravel = roundTo(totalRotationTravel + Math.abs(velocity));
 
-        addHeat(Math.abs(velocity) * heatPerDegree);
+        addHeat(roundTo(Math.abs(velocity) * heatPerDegree));
         checkRotationRewards();
 
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
+        wheel.style.transform = `rotate(${formatNumber(currentRotation)}deg)`;
 
         animationFrameId = requestAnimationFrame(updateInertia);
     }
@@ -734,20 +722,18 @@ function initWheelDrag() {
         if (frameDiff < -180) frameDiff += 360;
 
         const grabStrength = getGrabStrength(dist, center.radius);
-        const appliedDiff = frameDiff * grabStrength * spinPowerMultiplier;
+        const appliedDiff = roundTo(frameDiff * grabStrength * spinPowerMultiplier);
 
-        currentRotation += appliedDiff;
-        totalRotationTravel += Math.abs(appliedDiff);
+        currentRotation = roundTo(currentRotation + appliedDiff);
+        totalRotationTravel = roundTo(totalRotationTravel + Math.abs(appliedDiff));
 
-        addHeat(Math.abs(appliedDiff) *heatPerDegree);
+        addHeat(roundTo(Math.abs(appliedDiff) * heatPerDegree));
 
         checkRotationRewards();
 
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
+        wheel.style.transform = `rotate(${formatNumber(currentRotation)}deg)`;
 
-        velocityHistory.push(appliedDiff);
-        if (velocityHistory.length > 4) velocityHistory.shift();
-        velocity = velocityHistory.reduce((a, b) => a + b, 0) / velocityHistory.length;
+        velocity = roundTo(appliedDiff);
         lastAngle = currentAngle;
     });
 
@@ -785,7 +771,17 @@ document.addEventListener('DOMContentLoaded', () => {
     uiElements.btnLoad?.addEventListener('click', () => uiElements.fileLoad?.click());
     uiElements.fileLoad?.addEventListener('change', handleLoad);
 
-    startRigAnimation();
+    uiElements.btnCredits?.addEventListener('click', () => {
+        uiElements.creditsOverlay?.classList.add('open');
+    });
+    uiElements.creditsClose?.addEventListener('click', () => {
+        uiElements.creditsOverlay?.classList.remove('open');
+    });
+    uiElements.creditsOverlay?.addEventListener('click', (e) => {
+        if (e.target === uiElements.creditsOverlay) {
+            uiElements.creditsOverlay.classList.remove('open');
+        }
+    });
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

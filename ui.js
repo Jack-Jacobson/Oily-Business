@@ -71,6 +71,24 @@ const upgradeDefs = [
 let autoSpinEnabled = false;
 let autoVelocity = 0;
 
+const MUSIC_SHOCKWAVE_VOLUME = Math.pow(10, -11 / 20);
+const MUSIC_LATE_GAME_AUTOMATION_LEVEL = 4;
+const musicTracks = {
+    pitched: new Audio(encodeURI('assets/Main loop-pitched instruments.mp3')),
+    shockwave: new Audio(encodeURI('assets/Loop-shockwave (1).wav')),
+    percussion: new Audio(encodeURI('assets/Main loop-Percussion-late game.mp3'))
+};
+
+let musicStarted = false;
+let musicMode = null;
+let musicShockwaveStarted = false;
+
+for (const [name, track] of Object.entries(musicTracks)) {
+    track.preload = 'auto';
+    track.loop = false;
+    track.volume = name === 'shockwave' ? MUSIC_SHOCKWAVE_VOLUME : 0.7;
+}
+
 const rigFrameIntervalMs = 1600;
 let rigFrameTimerId = null;
 let rigFrameExtended = false;
@@ -79,7 +97,7 @@ const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
     btnHeat: document.getElementById('btn-heat'),
-    btnAchievement: document.getElementById('btn-achievement'),
+    btnAdvancements: document.getElementById('btn-achievement'),
     btnSettings: document.getElementById('btn-settings'),
 
     oilCount: document.getElementById('oil-count'),
@@ -102,8 +120,84 @@ const uiElements = {
 
     btnCredits: document.getElementById('btn-credits'),
     creditsOverlay: document.getElementById('credits-overlay'),
-    creditsClose: document.getElementById('credits-close')
+    creditsClose: document.getElementById('credits-close'),
+
+    advancementsOverlay: document.getElementById('advancements-overlay'),
+    advancementsClose: document.getElementById('advancements-close'),
+    advancementsList: document.getElementById('advancements-list')
 };
+
+function playTrack(track) {
+    if (!track) return;
+    const playResult = track.play();
+    if (playResult && typeof playResult.catch === 'function') {
+        playResult.catch(() => {});
+    }
+}
+
+function stopTrack(track) {
+    if (!track) return;
+    track.pause();
+    track.currentTime = 0;
+}
+
+function getMusicMode() {
+    return upgradeLevels[4] >= MUSIC_LATE_GAME_AUTOMATION_LEVEL ? 'percussion' : 'pitched';
+}
+
+function startEarlyGameMusic() {
+    stopTrack(musicTracks.percussion);
+    musicTracks.pitched.loop = false;
+    musicTracks.shockwave.loop = false;
+    musicShockwaveStarted = false;
+
+    musicTracks.pitched.currentTime = 0;
+    musicTracks.pitched.onended = () => {
+        if (!musicStarted || musicMode !== 'pitched') return;
+
+        if (!musicShockwaveStarted) {
+            musicShockwaveStarted = true;
+        }
+
+        musicTracks.shockwave.currentTime = 0;
+        musicTracks.pitched.currentTime = 0;
+        playTrack(musicTracks.pitched);
+        playTrack(musicTracks.shockwave);
+    };
+
+    playTrack(musicTracks.pitched);
+}
+
+function startLateGameMusic() {
+    stopTrack(musicTracks.pitched);
+    stopTrack(musicTracks.shockwave);
+    musicTracks.percussion.loop = true;
+    musicTracks.percussion.currentTime = 0;
+    playTrack(musicTracks.percussion);
+}
+
+function refreshMusic() {
+    const desiredMode = getMusicMode();
+    if (musicStarted && desiredMode === musicMode) return;
+
+    musicMode = desiredMode;
+
+    if (!musicStarted) return;
+
+    if (desiredMode === 'percussion') {
+        startLateGameMusic();
+        return;
+    }
+
+    startEarlyGameMusic();
+}
+
+function unlockMusic() {
+    if (musicStarted) return;
+
+    musicStarted = true;
+    refreshMusic();
+}
 
 /** 
 * @param {number} heatValue - Int between 0-100, represents heat levels for UI button
@@ -133,6 +227,8 @@ function updateMoneyUi(){
     if (uiElements.moneyCount){
         uiElements.moneyCount.textContent = formatNumber(money);
     }
+
+    updateAdvancementsPanelUI();
 }
 
 function spawnOilPopup(amount) {
@@ -202,6 +298,96 @@ function getUpgradeSubtext(index) {
     return texts[index] ?? '';
 }
 
+function getTotalPurchasedUpgrades() {
+    return upgradeLevels.reduce((total, level) => total + Math.max(0, level - 1), 0);
+}
+
+function formatAdvancementValue(value, kind = 'count') {
+    if (kind === 'money') {
+        return `$${formatNumber(value, 0)}`;
+    }
+
+    return formatNumber(value, 0);
+}
+
+function getAdvancementEntries() {
+    const totalPurchasedUpgrades = getTotalPurchasedUpgrades();
+
+    return [
+        {
+            title: 'First Upgrade',
+            description: 'Buy any upgrade to start pushing your rig beyond its default state.',
+            current: totalPurchasedUpgrades,
+            goal: 1,
+            kind: 'count'
+        },
+        {
+            title: 'Storage Expansion',
+            description: 'Raise storage to level 2 so the rig can keep extracting for longer.',
+            current: upgradeLevels[3],
+            goal: 2,
+            kind: 'count'
+        },
+        {
+            title: 'Automation Online',
+            description: 'Unlock auto spin and let the rig start working on its own.',
+            current: upgradeLevels[4],
+            goal: 2,
+            kind: 'count'
+        },
+        {
+            title: 'Late-Game Groove',
+            description: 'Reach automation level 4 to shift into the late-game soundtrack.',
+            current: upgradeLevels[4],
+            goal: 4,
+            kind: 'count'
+        },
+        {
+            title: 'Capital Reserve',
+            description: 'Build a cash reserve large enough to fund bigger expansions.',
+            current: money,
+            goal: 10000,
+            kind: 'money'
+        },
+        {
+            title: 'Rig Mastery',
+            description: 'Buy 10 upgrades total across the whole operation.',
+            current: totalPurchasedUpgrades,
+            goal: 10,
+            kind: 'count'
+        }
+    ];
+}
+
+function renderAdvancementsPanel() {
+    if (!uiElements.advancementsList) return;
+
+    uiElements.advancementsList.innerHTML = getAdvancementEntries().map((entry) => {
+        const progress = Math.min(1, entry.current / entry.goal);
+        const currentValue = formatAdvancementValue(entry.current, entry.kind);
+        const goalValue = formatAdvancementValue(entry.goal, entry.kind);
+        const statusText = progress >= 1 ? 'Unlocked' : 'Locked';
+
+        return `
+            <article class="advancement-card">
+                <div class="advancement-topline">
+                    <div class="advancement-name">${entry.title}</div>
+                    <div class="advancement-status">${statusText}</div>
+                </div>
+                <div class="advancement-description">${entry.description}</div>
+                <div class="advancement-meter" aria-hidden="true">
+                    <div class="advancement-meter-fill" style="width: ${progress * 100}%"></div>
+                </div>
+                <div class="advancement-progress">${currentValue}/${goalValue}</div>
+            </article>
+        `;
+    }).join('');
+}
+
+function updateAdvancementsPanelUI() {
+    renderAdvancementsPanel();
+}
+
 function updateUpgradeEffects() {
     oilMultiplier = roundTo(Math.pow(1.3, upgradeLevels[0]-1));
     spinPowerMultiplier = roundTo(Math.pow(1.2, upgradeLevels[1]-1));
@@ -218,6 +404,9 @@ function updateUpgradeEffects() {
     if (autoContainer && upgradeLevels[4] > 1) {
         autoContainer.style.display = 'flex';
     }
+
+    refreshMusic();
+    updateAdvancementsPanelUI();
 }
 function addOil(amount) {
 
@@ -247,6 +436,7 @@ function sellAllOil() {
 
     updateOilUI();
     updateMoneyUi();
+    updateAdvancementsPanelUI();
 }
 
 function updateDemand() {
@@ -419,8 +609,23 @@ function startRigAnimation() {
 function initNavbarListeners() {
     uiElements.btnMoney?.addEventListener('click', () => console.log('Money clicked'));
     uiElements.btnHeat?.addEventListener('click', () => console.log('Heat clicked'));
-    uiElements.btnAchievement?.addEventListener('click', () => console.log('Achievement clicked'));
+    uiElements.btnAdvancements?.addEventListener('click', () => {
+        uiElements.advancementsOverlay?.classList.add('open');
+        renderAdvancementsPanel();
+    });
     uiElements.btnSettings?.addEventListener('click', () => console.log('Settings clicked'));
+}
+
+function initAdvancementsPanel() {
+    uiElements.advancementsClose?.addEventListener('click', () => {
+        uiElements.advancementsOverlay?.classList.remove('open');
+    });
+
+    uiElements.advancementsOverlay?.addEventListener('click', (e) => {
+        if (e.target === uiElements.advancementsOverlay) {
+            uiElements.advancementsOverlay.classList.remove('open');
+        }
+    });
 }
 
 function initUpgradesPanel() {
@@ -490,12 +695,14 @@ async function handleLoad(event) {
         if (loadedData.upgradeCosts) upgradeCosts = [...loadedData.upgradeCosts];
 
         updateUpgradeEffects();
+        refreshMusic();
         
         updateOilUI();
         updateMoneyUi();
         updateHeatUI(heat);
         updateOilPanelUI();
         updateUpgradePanelUI();
+        updateAdvancementsPanelUI();
         
     } catch (e) {
         console.error("Failed to load save:", e);
@@ -793,6 +1000,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initWheelDrag(); 
     renderUpgradesPanel();
     initUpgradesPanel();
+    renderAdvancementsPanel();
+    initAdvancementsPanel();
     updateMoneyUi();
     initOilPanel();
     updateOilUI();
@@ -814,7 +1023,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.addEventListener('pointerdown', unlockMusic, { once: true });
+    document.addEventListener('keydown', unlockMusic, { once: true });
+
     startRigAnimation();
+    refreshMusic();
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

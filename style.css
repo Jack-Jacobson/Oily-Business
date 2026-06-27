@@ -449,3 +449,124 @@ body {
     font-size: 1rem;
     font-weight: 700;
 }
+.advancements-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 8, 12, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 210;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.advancements-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.advancements-modal {
+    width: min(720px, calc(100vw - 32px));
+    max-height: min(80vh, 760px);
+    overflow: hidden;
+    background: linear-gradient(180deg, #1e2228 0%, #171a1f 100%);
+    border: 1px solid rgba(255, 154, 31, 0.8);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    border-radius: 22px;
+    padding: 32px 30px 28px 30px;
+    position: relative;
+    transform: translateY(12px) scale(0.96);
+    transition: transform 0.2s ease;
+}
+.advancements-overlay.open .advancements-modal {
+    transform: translateY(0) scale(1);
+}
+.advancements-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.advancements-close:hover {
+    color: #ff9a1f;
+    background: #2a2d33;
+}
+.advancements-title {
+    color: #ff9a1f;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    text-align: center;
+    letter-spacing: 0.06em;
+}
+.advancements-copy {
+    color: #b6bcc8;
+    text-align: center;
+    margin-bottom: 22px;
+    font-size: 0.95rem;
+}
+.advancements-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    overflow-y: auto;
+    max-height: calc(80vh - 130px);
+    padding-right: 4px;
+}
+.advancement-card {
+    background: #242830;
+    border: 1px solid rgba(24, 63, 112, 0.85);
+    border-radius: 18px;
+    padding: 16px 16px 14px 16px;
+}
+.advancement-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.advancement-name {
+    color: #f4f4f4;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+.advancement-status {
+    color: #ff9a1f;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.advancement-description {
+    color: #b6bcc8;
+    font-size: 0.86rem;
+    line-height: 1.35;
+    margin-bottom: 12px;
+}
+.advancement-meter {
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+.advancement-meter-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #ff9a1f 0%, #ffd08a 100%);
+    box-shadow: 0 0 14px rgba(255, 154, 31, 0.35);
+}
+.advancement-progress {
+    color: #b6bcc8;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+}

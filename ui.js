@@ -105,13 +105,8 @@ const uiElements = {
 */
 function updateHeatUI(heatValue) {
     const clampedHeat = Math.max(0, Math.min(100, heatValue));
-
     if (uiElements.btnHeat) {
-        uiElements.btnHeat.style.background = `linear-gradient(to right, 
-            #8b3f00 0%,
-            #d97706 ${clampedHeat}%,
-            #212428 ${clampedHeat}%
-        )`;
+        uiElements.btnHeat.style.setProperty('--heat-pct', `${clampedHeat}%`);
     }
 }
 
@@ -588,7 +583,8 @@ function initWheelDrag() {
     // Wheel spinning physics vars
     let lastAngle = 0;
     let velocity = 0;
-    let friction = 0.98; // ADAPT AS NECESSARY --> Smaller number = more speed lost per frame 
+    let velocityHistory = [];
+    let friction = 0.98; // ADAPT AS NECESSARY --> Smaller number = more speed lost per frame
     let animationFrameId = null; // Physics animation loop reference
 
     const grabArea = 0.59; // Outer percent of wheel that you can grab ADAPT AS NECESSARY
@@ -669,6 +665,7 @@ function initWheelDrag() {
         }
 
         velocity = 0;
+        velocityHistory = [];
 
         const center = getCenter(wheel);
 

@@ -63,7 +63,23 @@ body {
 }
 .heat-button {
     overflow: hidden;
-    background: linear-gradient(to right, #8b3f00 0%, #d97706 0%, #212428 0%);
+    background: #212428;
+    position: relative;
+}
+.heat-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--heat-pct, 0%);
+    background: linear-gradient(to right, #8b3f00, #d97706);
+    transition: width 0.35s ease;
+    pointer-events: none;
+}
+.heat-button > * {
+    position: relative;
+    z-index: 1;
 }
 .oil-count {
     display: inline-block;
@@ -311,11 +327,13 @@ body {
 }
 /* ---------------- BOTTOM BUTTONS -------------------------------- */
 .bottom-controls {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-top: 40px;
-    width: 100%;
 }
 .bottom-controls .nav-button {
     flex: 0 1 auto;

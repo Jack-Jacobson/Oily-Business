@@ -733,7 +733,9 @@ function initWheelDrag() {
 
         wheel.style.transform = `rotate(${formatNumber(currentRotation)}deg)`;
 
-        velocity = roundTo(appliedDiff);
+        velocityHistory.push(appliedDiff);
+        if (velocityHistory.length > 4) velocityHistory.shift();
+        velocity = roundTo(velocityHistory.reduce((a, b) => a + b, 0) / velocityHistory.length);
         lastAngle = currentAngle;
     });
 

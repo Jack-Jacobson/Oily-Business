@@ -43,7 +43,7 @@ body {
     cursor: pointer;
     user-select: none;
     overflow: hidden;
-    transition: transform 0.5s ease, background 0.1s ease;
+    transition: transform 0.12s ease, background 0.1s ease;
 }
 .nav-button:active {
     transform: scale(0.98);
@@ -126,7 +126,6 @@ body {
     width: 350px;
     height: 350px;
     object-fit: contain;
-    bottom: -20px;
     left: 50%;
     top: 331px;
     transform: translateX(-50%);

@@ -70,6 +70,8 @@ const upgradeDefs = [
 
 let autoSpinEnabled = false;
 let autoVelocity = 0;
+let musicMuted = false;
+let musicVolume = 0.7;
 
 const MUSIC_SHOCKWAVE_VOLUME = Math.pow(10, -11 / 20);
 const MUSIC_LATE_GAME_AUTOMATION_LEVEL = 4;
@@ -86,7 +88,7 @@ let musicShockwaveStarted = false;
 for (const [name, track] of Object.entries(musicTracks)) {
     track.preload = 'auto';
     track.loop = false;
-    track.volume = name === 'shockwave' ? MUSIC_SHOCKWAVE_VOLUME : 0.7;
+    track.volume = name === 'shockwave' ? musicVolume * MUSIC_SHOCKWAVE_VOLUME : musicVolume;
 }
 
 const rigFrameIntervalMs = 1600;
@@ -122,6 +124,11 @@ const uiElements = {
     creditsOverlay: document.getElementById('credits-overlay'),
     creditsClose: document.getElementById('credits-close'),
 
+    settingsOverlay: document.getElementById('settings-overlay'),
+    settingsClose: document.getElementById('settings-close'),
+    settingsMusicToggle: document.getElementById('settings-music-toggle'),
+    settingsMusicVolume: document.getElementById('settings-music-volume'),
+
     advancementsOverlay: document.getElementById('advancements-overlay'),
     advancementsClose: document.getElementById('advancements-close'),
     advancementsList: document.getElementById('advancements-list')
@@ -141,11 +148,23 @@ function stopTrack(track) {
     track.currentTime = 0;
 }
 
+function applyMusicVolume() {
+    const effectiveVolume = musicMuted ? 0 : musicVolume;
+
+    for (const [name, track] of Object.entries(musicTracks)) {
+        track.volume = name === 'shockwave'
+            ? effectiveVolume * MUSIC_SHOCKWAVE_VOLUME
+            : effectiveVolume;
+    }
+}
+
 function getMusicMode() {
     return upgradeLevels[4] >= MUSIC_LATE_GAME_AUTOMATION_LEVEL ? 'percussion' : 'pitched';
 }
 
 function startEarlyGameMusic() {
+    if (musicMuted) return;
+
     stopTrack(musicTracks.percussion);
     musicTracks.pitched.loop = false;
     musicTracks.shockwave.loop = false;
@@ -169,6 +188,8 @@ function startEarlyGameMusic() {
 }
 
 function startLateGameMusic() {
+    if (musicMuted) return;
+
     stopTrack(musicTracks.pitched);
     stopTrack(musicTracks.shockwave);
     musicTracks.percussion.loop = true;
@@ -177,6 +198,15 @@ function startLateGameMusic() {
 }
 
 function refreshMusic() {
+    applyMusicVolume();
+
+    if (musicMuted) {
+        stopTrack(musicTracks.pitched);
+        stopTrack(musicTracks.shockwave);
+        stopTrack(musicTracks.percussion);
+        return;
+    }
+
     const desiredMode = getMusicMode();
     if (musicStarted && desiredMode === musicMode) return;
 
@@ -196,7 +226,18 @@ function unlockMusic() {
     if (musicStarted) return;
 
     musicStarted = true;
+    musicMode = null;
     refreshMusic();
+}
+
+function updateSettingsPanelUI() {
+    if (uiElements.settingsMusicToggle) {
+        uiElements.settingsMusicToggle.textContent = musicMuted ? 'Unmute Music' : 'Mute Music';
+    }
+
+    if (uiElements.settingsMusicVolume) {
+        uiElements.settingsMusicVolume.value = String(Math.round(musicVolume * 100));
+    }
 }
 
 /** 
@@ -613,7 +654,11 @@ function initNavbarListeners() {
         uiElements.advancementsOverlay?.classList.add('open');
         renderAdvancementsPanel();
     });
-    uiElements.btnSettings?.addEventListener('click', () => console.log('Settings clicked'));
+    uiElements.btnSettings?.addEventListener('click', () => {
+        unlockMusic();
+        updateSettingsPanelUI();
+        uiElements.settingsOverlay?.classList.add('open');
+    });
 }
 
 function initAdvancementsPanel() {
@@ -625,6 +670,35 @@ function initAdvancementsPanel() {
         if (e.target === uiElements.advancementsOverlay) {
             uiElements.advancementsOverlay.classList.remove('open');
         }
+    });
+}
+
+function initSettingsPanel() {
+    uiElements.settingsClose?.addEventListener('click', () => {
+        uiElements.settingsOverlay?.classList.remove('open');
+    });
+
+    uiElements.settingsOverlay?.addEventListener('click', (e) => {
+        if (e.target === uiElements.settingsOverlay) {
+            uiElements.settingsOverlay.classList.remove('open');
+        }
+    });
+
+    uiElements.settingsMusicToggle?.addEventListener('click', () => {
+        musicMuted = !musicMuted;
+
+        if (!musicMuted) {
+            unlockMusic();
+        }
+
+        refreshMusic();
+        updateSettingsPanelUI();
+    });
+
+    uiElements.settingsMusicVolume?.addEventListener('input', (e) => {
+        musicVolume = Math.max(0, Math.min(1, Number(e.target.value) / 100));
+        applyMusicVolume();
+        updateSettingsPanelUI();
     });
 }
 
@@ -1002,6 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initUpgradesPanel();
     renderAdvancementsPanel();
     initAdvancementsPanel();
+    initSettingsPanel();
     updateMoneyUi();
     initOilPanel();
     updateOilUI();
@@ -1022,6 +1097,8 @@ document.addEventListener('DOMContentLoaded', () => {
             uiElements.creditsOverlay.classList.remove('open');
         }
     });
+
+    updateSettingsPanelUI();
 
     document.addEventListener('pointerdown', unlockMusic, { once: true });
     document.addEventListener('keydown', unlockMusic, { once: true });

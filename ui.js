@@ -92,7 +92,11 @@ const uiElements = {
 
     btnSave: document.getElementById('btn-save'),
     btnLoad: document.getElementById('btn-load'),
-    fileLoad: document.getElementById('file-load')
+    fileLoad: document.getElementById('file-load'),
+
+    btnCredits: document.getElementById('btn-credits'),
+    creditsOverlay: document.getElementById('credits-overlay'),
+    creditsClose: document.getElementById('credits-close')
 };
 
 /** 
@@ -769,6 +773,18 @@ document.addEventListener('DOMContentLoaded', () => {
     uiElements.btnSave?.addEventListener('click', handleSave);
     uiElements.btnLoad?.addEventListener('click', () => uiElements.fileLoad?.click());
     uiElements.fileLoad?.addEventListener('change', handleLoad);
+
+    uiElements.btnCredits?.addEventListener('click', () => {
+        uiElements.creditsOverlay?.classList.add('open');
+    });
+    uiElements.creditsClose?.addEventListener('click', () => {
+        uiElements.creditsOverlay?.classList.remove('open');
+    });
+    uiElements.creditsOverlay?.addEventListener('click', (e) => {
+        if (e.target === uiElements.creditsOverlay) {
+            uiElements.creditsOverlay.classList.remove('open');
+        }
+    });
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

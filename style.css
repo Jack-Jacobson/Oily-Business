@@ -321,3 +321,100 @@ body {
     flex: 0 1 auto;
     min-width: 180px;
 }
+
+/* ---------------- CREDITS BUTTON ---------------- */
+.credits-btn {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    background: #212428;
+    border: 1px solid #183f70;
+    border-radius: 10px;
+    color: #f4f4f4;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 100;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.credits-btn:hover {
+    background: #2a2d33;
+    color: #ff9a1f;
+    border-color: #ff9a1f;
+}
+.credits-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.credits-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+.credits-modal {
+    background: #212428;
+    border: 1px solid #ff9a1f;
+    border-radius: 18px;
+    padding: 36px 48px 32px 48px;
+    position: relative;
+    min-width: 320px;
+    transform: scale(0.92);
+    transition: transform 0.2s ease;
+}
+.credits-overlay.open .credits-modal {
+    transform: scale(1);
+}
+.credits-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: #f4f4f4;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.credits-close:hover {
+    color: #ff9a1f;
+    background: #2a2d33;
+}
+.credits-title {
+    color: #ff9a1f;
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+    text-align: center;
+    letter-spacing: 0.06em;
+}
+.credits-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.credits-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+.credits-role {
+    color: #b6bcc8;
+    font-size: 0.9rem;
+}
+.credits-name {
+    color: #f4f4f4;
+    font-size: 1rem;
+    font-weight: 700;
+}

@@ -71,6 +71,10 @@ const upgradeDefs = [
 let autoSpinEnabled = false;
 let autoVelocity = 0;
 
+const rigFrameIntervalMs = 1600;
+let rigFrameTimerId = null;
+let rigFrameExtended = false;
+
 const uiElements = {
     btnMoney: document.getElementById('btn-money'),
     btnOil: document.getElementById('btn-oil'),
@@ -82,6 +86,8 @@ const uiElements = {
     moneyCount: document.getElementById('money-count'),
 
     wheel: document.getElementById('spin-wheel'),
+    oilRigBase: document.getElementById('oil-rig-base'),
+    oilRigExtended: document.getElementById('oil-rig-extended'),
     upgradesPanel: document.getElementById('upgrades-panel'),
     upgradesToggle: document.getElementById('upgrades-toggle'),
     upgradesContent: document.getElementById('upgrades-content'),
@@ -387,6 +393,29 @@ function buyUpgrade(index) {
 /**
  * Attachese navigation listeners
  */
+function startRigAnimation() {
+    if (rigFrameTimerId) {
+        clearInterval(rigFrameTimerId);
+        rigFrameTimerId = null;
+    }
+
+    const applyFrame = () => {
+        if (!isSpinning) {
+            if (rigFrameExtended) {
+                rigFrameExtended = false;
+                uiElements.oilRigBase?.classList.remove('hidden');
+                uiElements.oilRigExtended?.classList.remove('visible');
+            }
+            return;
+        }
+        rigFrameExtended = !rigFrameExtended;
+        uiElements.oilRigBase?.classList.toggle('hidden', rigFrameExtended);
+        uiElements.oilRigExtended?.classList.toggle('visible', rigFrameExtended);
+    };
+
+    rigFrameTimerId = setInterval(applyFrame, rigFrameIntervalMs);
+}
+
 function initNavbarListeners() {
     uiElements.btnMoney?.addEventListener('click', () => console.log('Money clicked'));
     uiElements.btnHeat?.addEventListener('click', () => console.log('Heat clicked'));
@@ -784,6 +813,8 @@ document.addEventListener('DOMContentLoaded', () => {
             uiElements.creditsOverlay.classList.remove('open');
         }
     });
+
+    startRigAnimation();
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);

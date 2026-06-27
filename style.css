@@ -121,11 +121,10 @@ body {
     transform-origin: center center;
     z-index: 2;
 }
-#oil-rig {
+#oil-rig-base, #oil-rig-extended {
     position: absolute;
     width: 350px;
-    height: 350px;
-    object-fit: contain;
+    height: auto;
     left: 50%;
     top: 331px;
     transform: translateX(-50%);
@@ -133,6 +132,20 @@ body {
     user-select: none;
     pointer-events: none;
     -webkit-user-drag: none;
+    object-fit: contain;
+    transition: opacity 0.45s ease;
+}
+#oil-rig-base {
+    opacity: 1;
+}
+#oil-rig-extended {
+    opacity: 0;
+}
+#oil-rig-extended.visible {
+    opacity: 1;
+}
+#oil-rig-base.hidden {
+    opacity: 0;
 }
 
 /* ------------------- POPUPS ------------------ */

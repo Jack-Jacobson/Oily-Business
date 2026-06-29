@@ -663,3 +663,89 @@ body {
     font-size: 0.82rem;
     letter-spacing: 0.02em;
 }
+/* ---------------- TUTORIAL POPUPS ----------------*/
+.tutorial-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none; /* Lets clicks pass through to the game */
+    z-index: 9999;
+}
+.tutorial-popup {
+    position: fixed;
+    background: #2a2d33;
+    border: 2px solid #ff9a1f;
+    border-radius: 14px;
+    padding: 16px 20px;
+    width: max-content;
+    max-width: 280px;
+    color: #f4f4f4;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.85);
+    pointer-events: auto; /* Catch clicks for the Next button */
+    animation: tutorial-bounce 1.5s infinite ease-in-out;
+    transition: opacity 0.3s ease;
+}
+@keyframes tutorial-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.tutorial-text {
+    font-size: 1.05rem;
+    line-height: 1.45;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.tutorial-btn {
+    background: #ff9a1f;
+    color: #111;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+.tutorial-btn:hover {
+    background: #e68a1c;
+}
+.tutorial-btn:active {
+    transform: scale(0.96);
+}
+
+/* Tutorial Directional Arrows (Fixed) */
+.tutorial-arrow {
+    position: absolute;
+    width: 0; 
+    height: 0; 
+    border-style: solid;
+}
+.tutorial-arrow.top {
+    bottom: -14px; /* Arrow at the bottom pointing down */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 14px 12px 0 12px;
+    border-color: #ff9a1f transparent transparent transparent;
+}
+.tutorial-arrow.bottom {
+    top: -14px; /* Arrow at the top pointing up */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 12px 14px 12px;
+    border-color: transparent transparent #ff9a1f transparent;
+}
+.tutorial-arrow.left {
+    right: -14px; /* Arrow on the right pointing right */
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 12px 0 12px 14px;
+    border-color: transparent transparent transparent #ff9a1f;
+}
+.tutorial-arrow.right {
+    left: -14px; /* Arrow on the left pointing left */
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 12px 14px 12px 0;
+    border-color: transparent #ff9a1f transparent transparent;
+}

@@ -1067,7 +1067,124 @@ function initWheelDrag() {
     wheel.addEventListener('pointerup', stopDrag);
     wheel.addEventListener('pointercancel', stopDrag);
 }
+/**
+ *  TUTORIAL LOGIC
+ */
+const tutorialSteps = [
+    {
+        targetId: 'spin-wheel',
+        text: 'Welcome to Oily Business!<br><br>Drag the wheel in a circle to start drilling for oil!',
+        placement: 'top'
+    },
+    {
+        targetId: 'btn-heat',
+        text: 'Watch your heat!<br><br>Spinning generates heat. If it hits 100%, the drill overheats and you must let it cool.',
+        placement: 'bottom'
+    },
+    {
+        targetId: 'btn-oil',
+        text: 'Your extracted oil goes here.<br><br>Click this button to open the panel and sell your oil for cash!',
+        placement: 'bottom'
+    },
+    {
+        targetId: 'upgrades-toggle',
+        text: 'Once you have money, click here to open your upgrades panel. Upgrade your rig to automate and earn more!',
+        placement: 'right'
+    }
+];
 
+let currentTutorialStep = 0;
+
+function initTutorial() {
+    if(localStorage.getItem('oilyBusinessTutorialDone') === 'true') {
+        return;
+    }
+
+    const container = document.getElementById('tutorial-container');
+    const nextBtn = document.getElementById('tutorial-next-btn');
+
+    if(container && nextBtn) {
+        container.style.display = 'block';
+
+        nextBtn.addEventListener('click', () => {
+            currentTutorialStep++;
+            showTutorialStep(currentTutorialStep);
+        });
+
+        setTimeout(() => {showTutorialStep(0);}, 100);
+        
+        window.addEventListener('resize', () => {
+            if(container.style.display === 'block') {
+                showTutorialStep(currentTutorialStep);
+            }
+        });
+    }
+}
+function showTutorialStep(index) {
+    const container = document.getElementById('tutorial-container');
+    const popup = document.getElementById('tutorial-popup');
+    const textEl = document.getElementById('tutorial-text');
+    const arrow = document.getElementById('tutorial-arrow');
+    const nextBtn = document.getElementById('tutorial-next-btn');
+
+    if (index >= tutorialSteps.length) {
+        container.style.display = 'none';
+        localStorage.setItem('oilyBusinessTutorialDone', 'true');
+        return;
+    }
+
+    const step = tutorialSteps[index];
+    const target = document.getElementById(step.targetId);
+    
+    if (!target) return;
+
+    textEl.innerHTML = step.text;
+    arrow.className = 'tutorial-arrow ' + step.placement;
+    
+    if (index === tutorialSteps.length - 1) {
+        nextBtn.textContent = 'Got it!';
+    } else {
+        nextBtn.textContent = 'Next';
+    }
+
+    const updatePosition = () => {
+        const rect = target.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        let top = 0;
+        let left = 0;
+        const gap = 20; 
+
+        switch (step.placement) {
+            case 'top':
+                top = rect.top - popupRect.height - gap;
+                left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+                break;
+            case 'bottom':
+                top = rect.bottom + gap;
+                left = rect.left + (rect.width / 2) - (popupRect.width / 2);
+                break;
+            case 'left':
+                top = rect.top + (rect.height / 2) - (popupRect.height / 2);
+                left = rect.left - popupRect.width - gap;
+                break;
+            case 'right':
+                top = rect.top + (rect.height / 2) - (popupRect.height / 2);
+                left = rect.right + gap;
+                break;
+        }
+
+        if (left < 15) left = 15;
+        if (top < 15) top = 15;
+        if (left + popupRect.width > window.innerWidth - 15) {
+            left = window.innerWidth - popupRect.width - 15;
+        }
+
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+    };
+
+    updatePosition();
+}
 // Ensures html loaded then assigns logic
 document.addEventListener('DOMContentLoaded', () => {
     initNavbarListeners(); 
@@ -1108,4 +1225,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(updateDemand, 10000);
     setInterval(coolHeat, 1000);
+
+    initTutorial();
 });
